@@ -1,0 +1,34 @@
+---
+title: "Diamond sizes"
+date: 2016-08-25
+output: html_document
+---
+
+```{r setup, include = FALSE}
+library(ggplot2)
+library(dplyr)
+smaller <- diamonds %>%
+filter(carat <= 2.5)
+```
+
+We have data about `r nrow(diamonds)` diamonds. Only `r nrow(diamonds) - nrow(smaller)` are larger than 2.5 carats. The distribution of the remainder is shown below:
+
+```{r draw graphic, echo = FALSE}
+smaller %>%
+ggplot(aes(carat)) +
+geom_freqpoly(binwidth = 0.01)
+```
+
+# Mi nuevo párrafo de *prueba*
+
+Mi experimento con **negrita**, *cursiva* ***y ambas***
+
+Una prueba ejecutando bash
+
+```{bash Prueba de Consola}
+ls -l -a
+```
+
+Ahora pruebo con una imagen:
+
+![](../assets/DATAGOV.png)
