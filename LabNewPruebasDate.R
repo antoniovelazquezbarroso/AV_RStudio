@@ -44,43 +44,21 @@ Changed <- Clean %>%
                 ) %>% 
           left_join(unique(read_excel("data/Cods.xlsx")), by = "Codigo") %>% 
           arrange(Fecha, NumOrden)%>% 
-          select(Fecha, Importe, Saldo, Codigo, Descripcion, Concepto)
+          select(Fecha, NumOrden, Importe, Saldo, Codigo, Descripcion, Concepto)
 
 Changed
 
 # Códigos, Filtrados los códigos realmente existentes en Movs, y
 # Cargadas desde el Excel sus descripciones, y
 # Ordenados por número de Codigo
-Cods <- as_tibble_col(unique(Clean$Codigo), column_name = "Codigo") %>
-  left_join(unique(read_excel("data/Cods.xlsx")), by = "Codigo") %>% 
-  arrange(Codigo)
+Cods <- as_tibble_col(unique(Clean$Codigo), column_name = "Codigo")
+Cods
 
+Codigos <-  Cods %>% 
+            left_join(unique(read_excel("data/Cods.xlsx")), by = "Codigo") %>% 
+            arrange(Codigo)
+Codigos
 
-RawMovs <-Entrada
-CleanMovs <-  RawMovs %>% 
-  mutate(Date=parse_date(`Fecha Operación`, "%d/%m/%Y"),
-         #OtherDate=as.Date(`Fecha Operación`, "%d/%m/%Y"),
-         TextDate=format(Date, "%d/%m/%Y"),
-         #StringDate= mday(Date)/month(Date)/year(Date),
-         MonthDay=mday(Date),
-         Month=month(Date),
-         Year=year(Date)
-  ) 
-CleanMovs
-
-
-#Otro similar a MovsByCods, empezando por los movimientos
-MovsWithCods <- Movs %>% 
-  left_join(Cods, by = "Codigo") %>% 
-  select(Dia, Mes, Año, Codigo, Descripcion, Importe, Concepto, FechaNS) %>% 
-  arrange(FechaNS) %>% 
-  group_by(Codigo, Descripcion, Año, Mes) %>% 
-  summarise(numero = n(),
-            total_mes = sum(Importe),
-  )
-
-MovsWithCods
-print(MovsWithCods, n=nrow(MovsWithCods))
 
 
 
