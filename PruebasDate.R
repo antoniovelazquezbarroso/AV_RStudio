@@ -14,9 +14,9 @@ Cods <- as_tibble_col(unique(Movs$Codigo), column_name = "Codigo") %>%
   arrange(Codigo)
 
 
-RawMovs <- Movs
-names(RawMovs)
-CleanMovs <-  RawMovs %>% 
+
+names(Movs)
+CleanMovs <-  Movs %>% 
               mutate(Date=parse_date(Fecha, "%d/%m/%Y"),
                      OtherDate=as.Date(Fecha, "%d/%m/%Y"),
                      TextDate=format(Date, "%d/%m/%Y"),
@@ -27,20 +27,30 @@ CleanMovs <-  RawMovs %>%
                      ) 
 CleanMovs
 
-
 #Otro similar a MovsByCods, empezando por los movimientos
-MovsWithCods <- Movs %>% 
+(
+  MovsWithCods <- Movs %>% 
   left_join(Cods, by = "Codigo") %>% 
   select(Dia, Mes, Año, Codigo, Descripcion, Importe, Concepto, FechaNS) %>% 
-  arrange(FechaNS) %>% 
+  arrange(FechaNS)
+)
+
+print(MovsWithCods, n=nrow(MovsWithCods))
+
+(
+  MovsByMonth <- MovsWithCods %>%
   group_by(Codigo, Descripcion, Año, Mes) %>% 
   summarise(numero = n(),
             total_mes = sum(Importe),
-  )
-
-MovsWithCods
-print(MovsWithCods, n=nrow(MovsWithCods))
+           )
+)
 
 
+# CleanMovsWithCods
 
+
+CleanMovsWithCods <- CleanMovs %>%
+                     left_join(Cods, by = "Codigo") %>% 
+                     select(Date,Dia, Mes, Año, Codigo, Descripcion, Importe, Concepto, FechaNS) %>% 
+                     arrange(FechaNS)
 

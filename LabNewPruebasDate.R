@@ -3,15 +3,16 @@ library(lubridate)
 library(readxl)
 
 
-NewExportMovs <- read_excel("data/20220901_20240831.xlsx") # Movimientos 01JUL2022-31JUL2024
-                                                                 # Por fecha operación orden inverso
+NewMovs <- read_excel("data/20220901_20240831.xlsx") # Movimientos 01SEP2022-31AGO2024
+                                                     # Por fecha operación orden inverso
 
-SaldoInicial <- first(NewExportMovs$Saldo)
-SaldoFinal <- last(NewExportMovs$Saldo)
-Cobros <- NewExportMovs %>% 
+# Comprobación de integridad del fichero por saldo
+SaldoInicial <- first(NewMovs$Saldo)
+SaldoFinal <- last(NewMovs$Saldo)
+Cobros <- NewMovs %>% 
           filter(Importe>0) %>% 
           summarise(sum(Importe))
-Pagos <-  NewExportMovs %>% 
+Pagos <-  NewMovs %>% 
           filter(Importe<0) %>% 
           summarise(sum(Importe)) 
 
@@ -19,25 +20,26 @@ CheckSaldo <- SaldoInicial
               -SaldoFinal
               + Cobros
               - Pagos
-CheckSaldo == first(NewExportMovs$Saldo) # Debe ser TRUE
+CheckSaldo == first(NewMovs$Saldo) # Debe ser TRUE
+
 
 # Elimina columnas innecesarias, cambia nombres de columnas incómodos
-Clean <- NewExportMovs %>% select(-`Fecha Valor`,-`Divisa...5`,-`Divisa...7`)  
-names(Clean)[1] = "Fecha"
-names(Clean)[5] = "Codigo"
+CleanMovs <- NewMovs %>% select(-`Fecha Valor`,-`Divisa...5`,-`Divisa...7`)  
+names(CleanMovs)[1] = "Fecha"
+names(CleanMovs)[5] = "Codigo"
 
-Clean
+CleanMovs
 
 # Convierte a Date la columna Fecha,
 # incluye orden de movimientos del banco,
 # añade la Descripcion del Codigo
 # ordena por Fecha y NumOrden
 # 
-Changed <- Clean %>% 
+ChangedMovs <- CleanMovs %>% 
           mutate(
                  Fecha = parse_date(Fecha, "%d/%m/%Y"),
                  #TextoFecha = format(Fecha, "%d/%m/%Y"),
-                 NumOrden = (dim(Clean)[1] - row_number( ) + 1)#,
+                 NumOrden = (dim(CleanMovs)[1] - row_number( ) + 1)#,
                  #MonthDay = mday(Fecha),
                  #Month = month(Fecha),
                  #Year = year(Fecha)
@@ -46,12 +48,12 @@ Changed <- Clean %>%
           arrange(Fecha, NumOrden)%>% 
           select(Fecha, NumOrden, Importe, Saldo, Codigo, Descripcion, Concepto)
 
-Changed
+ChangedMovs
 
 # Códigos, Filtrados los códigos realmente existentes en Movs, y
 # Cargadas desde el Excel sus descripciones, y
 # Ordenados por número de Codigo
-Cods <- as_tibble_col(unique(Clean$Codigo), column_name = "Codigo")
+Cods <- as_tibble_col(unique(CleanMovs$Codigo), column_name = "Codigo")
 Cods
 
 Codigos <-  Cods %>% 
