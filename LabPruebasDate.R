@@ -21,7 +21,7 @@ CheckSaldo <- SaldoInicial
               + Cobros
               - Pagos
 CheckSaldo == first(NewMovs$Saldo) # Debe ser TRUE
-rm(SaldoInicial, SaldoFinal,Cobros, Pagos, CheckSaldo)
+
 
 # Elimina columnas innecesarias, cambia nombres de columnas incómodos
 CleanMovs <- NewMovs %>% select(-`Fecha Valor`,-`Divisa...5`,-`Divisa...7`)  
@@ -29,7 +29,7 @@ names(CleanMovs)[1] = "Fecha"
 names(CleanMovs)[5] = "Codigo"
 
 CleanMovs
-rm(NewMovs)
+
 # Convierte a Date la columna Fecha,
 # incluye orden de movimientos del banco,
 # añade la Descripcion del Codigo
@@ -47,18 +47,17 @@ ChangedMovs <- CleanMovs %>%
                arrange(Fecha, NumOrden)%>% 
                select(Fecha, NumOrden, Importe, Saldo, Codigo, Descripcion, Concepto)
 ChangedMovs
-rm(CleanMovs)
-# Códigos, Filtrados los códigos realmente existentes en Movs,
+
+# Códigos, Filtrados los códigos realmente existentes en Movs, y
 # Cargadas desde el Excel sus descripciones, y
 # Ordenados por número de Codigo
-Cods <- as_tibble_col(unique(ChangedMovs$Codigo), column_name = "Codigo")
+Cods <- as_tibble_col(unique(CleanMovs$Codigo), column_name = "Codigo")
 Cods
 
 Codigos <-  Cods %>% 
             left_join(unique(read_excel("data/Cods.xlsx")), by = "Codigo") %>% 
             arrange(Codigo)
 Codigos
-rm(Cods)
 
 
 
