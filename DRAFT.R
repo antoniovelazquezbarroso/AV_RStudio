@@ -2,27 +2,27 @@ library(tidyverse)
 library(lubridate)
 library(readxl)
 
+# Movimientos 01SEP2022-31AGO2024 por fecha operación orden inverso
+NewMovs <- read_excel("data/20220901_20240831.xlsx") 
 
-NewMovs <- read_excel("data/20220901_20240831.xlsx") # Movimientos 01SEP2022-31AGO2024
+NewMovs                                                     
 
-NewMovs                                                     # Por fecha operación orden inverso
-
-# Comprobación de integridad del fichero por saldo
-SaldoInicial <- first(NewMovs$Saldo)
-SaldoFinal <- last(NewMovs$Saldo)
-Cobros <- NewMovs %>% 
-  filter(Importe>0) %>% 
-  summarise(sum(Importe))
-Pagos <-  NewMovs %>% 
-  filter(Importe<0) %>% 
-  summarise(sum(Importe)) 
-
-CheckSaldo <- SaldoInicial
--SaldoFinal
-+ Cobros
-- Pagos
-CheckSaldo == first(NewMovs$Saldo) # Debe ser TRUE
-rm(SaldoInicial, SaldoFinal,Cobros, Pagos, CheckSaldo)
+#      # Comprobación de integridad del fichero por saldo
+#      SaldoInicial <- first(NewMovs$Saldo)
+#      SaldoFinal <- last(NewMovs$Saldo)
+#      Cobros <- NewMovs %>% 
+#        filter(Importe>0) %>% 
+#        summarise(sum(Importe))
+#      Pagos <-  NewMovs %>% 
+#        filter(Importe<0) %>% 
+#        summarise(sum(Importe)) 
+#      
+#      CheckSaldo <- SaldoInicial
+#      -SaldoFinal
+#      + Cobros
+#      - Pagos
+#      CheckSaldo == first(NewMovs$Saldo) # Debe ser TRUE
+#      rm(SaldoInicial, SaldoFinal,Cobros, Pagos, CheckSaldo)
 
 # Elimina columnas innecesarias, cambia nombres de columnas incómodos
 CleanMovs <- NewMovs %>% select(-`Fecha Valor`,-`Divisa...5`,-`Divisa...7`)  
@@ -32,8 +32,8 @@ names(CleanMovs)[5] = "Codigo"
 CleanMovs
 rm(NewMovs)
 
-# Convierte a Date la columna Fecha,
-# incluye orden de movimientos del banco,
+# Convierte a tipo Date la columna Fecha,
+# incluye NumOrden de movimientos del banco,
 # añade la Descripcion del Codigo
 # ordena por Fecha y NumOrden
 ChangedMovs <- CleanMovs %>% 
@@ -54,22 +54,75 @@ ChangedMovs
 Movs <- ChangedMovs   # Cortito
 rm(CleanMovs, ChangedMovs)
 
+#      # Códigos, Filtrados los códigos realmente existentes en Movs,
+#      # Cargadas desde el Excel sus descripciones, y
+#      # Ordenados por número de Codigo
+#      Cods <- as_tibble_col(unique(Movs$Codigo), column_name = "Codigo")
+#      Cods
+#      
+#      Codigos <-  Cods %>% 
+#        left_join(unique(read_excel("data/Cods.xlsx")), by = "Codigo") %>% 
+#        arrange(Codigo) %>% 
+#        select(Codigo, Descripcion)
+#      Codigos
+#      rm(Cods)
 
 
-# Códigos, Filtrados los códigos realmente existentes en Movs,
-# Cargadas desde el Excel sus descripciones, y
-# Ordenados por número de Codigo
-Cods <- as_tibble_col(unique(Movs$Codigo), column_name = "Codigo")
-Cods
+ggplot(Movs, aes(Importe)) +         # Histograma de movimientos por Importe
+  geom_histogram(bins = 500)
 
-Codigos <-  Cods %>% 
-  left_join(unique(read_excel("data/Cods.xlsx")), by = "Codigo") %>% 
-  arrange(Codigo) %>% 
-  select(Codigo, Descripcion)
-Codigos
-rm(Cods)
+ggplot(Movs, aes(Fecha, Saldo)) +    # Historico de saldos por Fecha
+  geom_line()
 
 
+
+Movs %>% arrange(desc(Importe))
+Movs %>% arrange(Importe)
+
+# Movs %>% arrange(Fecha)         # arrange innecesario, Movs ya tiene ese orden
+
+Movs %>% filter(Codigo=="174") %>% summarise(n())
+count(Movs %>% filter(Codigo=="174"))
+Movs %>% filter(Codigo=="174")
+Movs %>% filter(Codigo=="174") %>% print(n=nrow(Movs %>% filter(Codigo=="174")))
+                               # siguiente arrange innecesario, Movs ya tiene ese orden
+# Movs %>% filter(Codigo=="174") %>% arrange(Fecha) %>% print(n=nrow(Movs %>% filter(Codigo=="174")))
+
+
+Movs %>% filter(Codigo=="174", grepl("Geminis", Concepto)) %>% arrange(Fecha) %>% print(n=nrow(Movs))
+Movs %>% filter(Codigo=="174", grepl("Cp Rfv 44", Concepto)) %>% arrange(Fecha) %>% print(n=nrow(Movs))
+Movs %>% filter(Codigo=="174", grepl("Yoigo", Concepto)) %>% arrange(Fecha) %>% print(n=nrow(Movs))
+Movs %>% filter(Codigo=="174", grepl("Naturgy", Concepto)) %>% arrange(Fecha) %>% print(n=nrow(Movs))
+Movs %>% filter(Codigo=="174", grepl("Gesternova", Concepto)) %>% arrange(Fecha) %>% print(n=nrow(Movs))
+Movs %>% filter(Codigo=="174", grepl("Recibo Raimundo Fernandez", Concepto)) %>% arrange(Fecha) %>% print(n=nrow(Movs))
+
+Movs %>% filter(Codigo=="174", !grepl("Gesternova", Concepto),
+                               !grepl("Naturgy", Concepto),
+                               !grepl("Yoigo", Concepto),
+                               !grepl("Cp Rfv 44", Concepto),
+                               !grepl("Geminis", Concepto),
+                               !grepl("Recibo Raimundo Fernandez", Concepto)
+                ) %>% arrange(Fecha) %>% print(n=nrow(Movs))
+
+
+Movs %>% filter(Importe> 200) %>%  print(n=nrow(Movs))
+
+
+Movs %>% filter(Codigo=="072") %>% arrange(Fecha) %>% print(n=nrow(Movs %>% filter(Codigo=="072")))
+
+
+MESES <- Movs %>% 
+         group_by(Año=year(Fecha), Mes=month(Fecha)) %>% 
+         summarise(Num=n(),
+                   Total=sum(Importe),
+                   Ingresos=sum(Importe[Importe>0]),
+                   Gastos=sum(Importe[Importe<0]),
+                   S_Inicial = Saldo[NumOrden == first(NumOrden)]- Importe[NumOrden == first(NumOrden)],
+                   S_Final = Saldo[NumOrden == last(NumOrden)]
+                  )
+MESES %>% print(n=nrow(MESES))
+MESES$Num
+mean(MESES$Num)
 
 
 LAB <- Movs %>%
@@ -141,17 +194,10 @@ LAB <- Movs %>%
   arrange(`year(Fecha)`, `month(Fecha)`, desc(`sum(Importe)`))
 LAB
 
-
-
-
-
-
 LAB <- Movs %>%
   group_by(year(Fecha), month(Fecha), Codigo, Descripcion) %>%  
   summarise(
             n(),
-            Año=year(Fecha),
-            Mes=month(Fecha),
             sum(Importe),
             max(Importe),
             min(Importe),
@@ -163,7 +209,7 @@ LAB <- Movs %>%
             Inicial = Saldo[NumOrden == first(NumOrden)] 
                     - Importe[NumOrden == first(NumOrden)],
             min(Fecha),
-            first(Fecha),
+            first(Fecha)
            ) %>%
              arrange(desc(`sum(Importe)`))
 LAB
