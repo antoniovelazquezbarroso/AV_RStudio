@@ -36,4 +36,5 @@ ChangedMovs <- CleanMovs %>%
 ChangedMovs
 
 Movs <- ChangedMovs   # Cortito
-rm(CleanMovs, ChangedMovs)
+BS <- Movs
+rm(CleanMovs, ChangedMovs, Movs)

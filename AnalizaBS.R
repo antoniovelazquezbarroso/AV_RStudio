@@ -1,16 +1,51 @@
-source("ProcesaMovs.R")
+source("ProcesaBS.R")
 
-ggplot(Movs, aes(Importe)) +         # Histograma de movimientos por Importe
+n_meses <- ceiling(interval(first(BS$Fecha),last(BS$Fecha))/dmonths(1))
+n_meses                              # Para varios cálculos luego
+
+BS %>% summarize(
+                   numero = n(),
+                   inicial = first(Fecha),
+                   final = last(Fecha),
+                   n_cobros = sum(Importe>0),
+                   tot_cobros = sum(Importe[Importe>0]),
+                   cobro_medio = mean(Importe[Importe>0]),
+                   n_pagos = sum(Importe<0),
+                   tot_pagos = sum(Importe[Importe<0]),
+                   pago_medio = mean(Importe[Importe<0]),
+                   pago_medio = mean(Importe[Importe<0]),
+                   pago_medio = mean(Importe[Importe<0])
+                   )
+
+GastoMedioMensual <- sum(BS$Importe[BS$Importe<0])/n_meses
+GastoMedioMensual
+
+BS %>% group_by(Año = year(Fecha), Mes = month(Fecha)) %>% 
+         summarize(
+                   n_BS = n(),
+                   n_cobros = sum(Importe>0),
+                   tot_cobros = sum(Importe[Importe>0]),
+                   cobro_medio = mean(Importe[Importe>0]),
+                   n_pagos = sum(Importe<0),
+                   tot_pagos = sum(Importe[Importe<0]),
+                   pago_medio = mean(Importe[Importe<0]),
+                   pago_medio = mean(Importe[Importe<0]),
+                   pago_medio = mean(Importe[Importe<0]),
+                   varsaldo = tot_cobros + tot_pagos
+                  ) %>% 
+                   select(Año, Mes, n_BS, varsaldo, everything()) %>% 
+                   print(n = nrow(BS))
+              
+ggplot(BS, aes(Importe)) +         # Histograma de movimientos por Importe
   geom_histogram(bins = 500)
 
-ggplot(Movs, aes(Fecha, Saldo)) +    # Historico de saldos por Fecha
+ggplot(BS, aes(Fecha, Saldo)) +    # Historico de saldos por Fecha
   geom_line()
 
+ggplot(BS, aes(Fecha, Importe, colour = (Importe>0))) +
+  geom_point()                       # Ingresos y gastos por Fecha
 
-n_meses <- ceiling(interval(first(Movs$Fecha),last(Movs$Fecha))/dmonths(1))
-n_meses
-
-Cobros <- Movs %>% filter(Importe>0)
+Cobros <- BS %>% filter(Importe>0)
 ggplot(Cobros, aes(Importe)) +         # Histograma de Ingresos por Importe
   geom_histogram(bins = 500)
 
@@ -18,13 +53,19 @@ Cobros %>% arrange(desc(Importe)) %>% print(n=20) # Los 20 mayores
 count(Cobros)
 sum(Cobros$Importe)
 
-Pagos <- Movs %>% filter(Importe<0)
-ggplot(Pagos, aes(abs(Importe))) +         # Histograma de Ingresos por Importe
+Pagos <- BS %>% filter(Importe<0)
+ggplot(Pagos, aes(abs(Importe))) +         # Histograma de Pagos por Importe
   geom_histogram(bins = 500)
 
-Pagos %>% arrange(Importe) %>% print(n=20) # Los 20 mayores
+ggplot(Pagos, aes(Fecha, abs(Importe))) + # Pagos por Fecha
+geom_point()
 
-Tarjetas <- Movs %>% filter(Codigo=="136")    
+
+Pagos %>% arrange(Importe) %>% print(n=20) # Los 20 mayores
+                                           # Los 20 mayores quitando Cajeros y Recibos Raimundo ¡¡VIAJES!!
+Pagos %>% filter(!grepl("Recibo", Concepto), !grepl("Reint", Concepto)) %>% arrange(Importe) %>% print(n=20)
+
+Tarjetas <- BS %>% filter(Codigo=="136")    
 count( Tarjetas)
 max(abs(Tarjetas$Importe))
 Tarjetas %>% select(Importe, Fecha,Concepto) %>% arrange(Importe, Fecha) %>% print(n=20) # Los 20 mayores
@@ -32,7 +73,7 @@ Tarjetas %>% filter(abs(Importe) == max(abs(Importe)))
 mean(abs(Tarjetas$Importe))
 min(abs(Tarjetas$Importe))
 
-Cajeros <-  Movs %>% filter(Codigo=="136", grepl("Reintegro, Atm", Concepto)| grepl("Reint. Cajero", Concepto))
+Cajeros <-  BS %>% filter(Codigo=="136", grepl("Reintegro, Atm", Concepto)| grepl("Reint. Cajero", Concepto))
 count(Cajeros)
 count(Cajeros)/n_meses
 sum(Cajeros$Importe)
@@ -52,12 +93,16 @@ ggplot(Cajeros, aes(Fecha, Importe)) +    # Historico de retiradas cajero por Fe
   geom_col()
 
 
-Comunidad <- Movs %>% filter(
+Comunidad <- BS %>% filter(
   Codigo=="174" & grepl("Geminis", Concepto)|
     Codigo=="174" & grepl("Cp Rfv 44", Concepto)|
     Codigo=="174" & grepl("Recibo Raimundo Fernandez", Concepto)
 )
 Comunidad %>% print(n=nrow(Comunidad))
+
+# Disparate de evolución Gastos de Comunidad
+ggplot(Comunidad,aes(Fecha,abs(Importe))) +
+  geom_point()
 
 
 Comunidad %>% group_by(Año= year(Fecha), Mes=month(Fecha)) %>%  summarize(
@@ -67,7 +112,7 @@ Comunidad %>% group_by(Año= year(Fecha), Mes=month(Fecha)) %>%  summarize(
 ) %>% print(n=nrow(Comunidad))
 
 
-LAB <- Movs %>%
+LAB <- BS %>%
 #  group_by(Año = year(Fecha), Mes = month(Fecha), Codigo, Descripcion) %>% 
        group_by(Año = year(Fecha), Mes = month(Fecha)) %>% 
        summarise(num = n(),
@@ -95,10 +140,10 @@ LAB
 LAB %>% print(n=nrow(LAB))
 
 
-mean(LAB$ingresos)
-mean(LAB$gastos)
-max(LAB$gastos)
-min(LAB$gastos)
+mean(LAB$Ingresos)
+mean(LAB$Gastos)
+max(LAB$Gastos)
+min(LAB$Gastos)
 
 
 
@@ -117,7 +162,7 @@ mean(LAB$Comunidad[LAB$Año == 2024])
 
 
 
-LAB <- Movs %>%
+LAB <- BS %>%
   group_by(year(Fecha), month(Fecha), Codigo, Descripcion) %>%  
   summarise(
     n(),
@@ -136,3 +181,4 @@ LAB <- Movs %>%
   ) %>%
   arrange(desc(`sum(Importe)`))
 LAB 
+
