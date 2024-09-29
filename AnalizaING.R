@@ -139,3 +139,4 @@ LAB <- ING %>%
   ) %>%
   arrange(desc(`sum(Importe)`))
 LAB 
+

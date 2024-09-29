@@ -1,9 +1,15 @@
+# IMPORTA DESDE EXCEL MOVIMIENTOS ING (Entrada) Y LOS TRANSFORMA (ING)
+
 library(tidyverse)
 library(lubridate)
 library(readxl)
 
 # Movimientos 01SEP2022-31AGO2024 por fecha operación orden inverso
 Entrada <- read_excel("data/MovsING_20220901_20240922.xlsx") 
+
+   #> names(Entrada)
+   #[1] "F. VALOR"     "CATEGORÍA"    "SUBCATEGORÍA" "DESCRIPCIÓN"  "COMENTARIO"   "IMAGEN"       "IMPORTE (€)" 
+   #[8] "SALDO (€)"
 
 # EN UN PASO
 # Elimina columnas innecesarias, cambia nombres de columnas incómodos
@@ -25,6 +31,9 @@ ING <- Entrada %>%
         ) %>% 
   arrange(Fecha, NumOrden) %>% 
   select(Fecha, NumOrden, Importe, Saldo,Descripcion, Categoria, Subcategoria)
+
+    #> names(ING)
+    #[1] "Fecha"        "NumOrden"     "Importe"      "Saldo"        "Descripcion"  "Categoria"    "Subcategoria"
 
 rm(Entrada)
 

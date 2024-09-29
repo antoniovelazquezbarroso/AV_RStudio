@@ -3,39 +3,68 @@ source("ProcesaBS.R")
 n_meses <- ceiling(interval(first(BS$Fecha),last(BS$Fecha))/dmonths(1))
 n_meses                              # Para varios cálculos luego
 
-BS %>% summarize(
-                   numero = n(),
-                   inicial = first(Fecha),
-                   final = last(Fecha),
-                   n_cobros = sum(Importe>0),
-                   tot_cobros = sum(Importe[Importe>0]),
-                   cobro_medio = mean(Importe[Importe>0]),
-                   n_pagos = sum(Importe<0),
-                   tot_pagos = sum(Importe[Importe<0]),
-                   pago_medio = mean(Importe[Importe<0]),
-                   pago_medio = mean(Importe[Importe<0]),
-                   pago_medio = mean(Importe[Importe<0])
-                   )
+Total <- BS %>% summarize(
+                            numero = n(),
+                            inicial = first(Fecha),
+                            final = last(Fecha),
+                            n_cobros = sum(Importe>0),
+                            tot_cobros = sum(Importe[Importe>0]),
+                            cobro_medio = mean(Importe[Importe>0]),
+                            n_pagos = sum(Importe<0),
+                            tot_pagos = sum(Importe[Importe<0]),
+                            pago_medio = mean(Importe[Importe<0]),
+                            varsaldo = tot_cobros + tot_pagos                            
+                            )
+Total
+
+IngresoMedioMensual <- sum(BS$Importe[BS$Importe>0])/n_meses
+IngresoMedioMensual
 
 GastoMedioMensual <- sum(BS$Importe[BS$Importe<0])/n_meses
 GastoMedioMensual
 
-BS %>% group_by(Año = year(Fecha), Mes = month(Fecha)) %>% 
-         summarize(
-                   n_BS = n(),
-                   n_cobros = sum(Importe>0),
-                   tot_cobros = sum(Importe[Importe>0]),
-                   cobro_medio = mean(Importe[Importe>0]),
-                   n_pagos = sum(Importe<0),
-                   tot_pagos = sum(Importe[Importe<0]),
-                   pago_medio = mean(Importe[Importe<0]),
-                   pago_medio = mean(Importe[Importe<0]),
-                   pago_medio = mean(Importe[Importe<0]),
-                   varsaldo = tot_cobros + tot_pagos
-                  ) %>% 
-                   select(Año, Mes, n_BS, varsaldo, everything()) %>% 
-                   print(n = nrow(BS))
-              
+VarSaldoMedioMensual <- IngresoMedioMensual + GastoMedioMensual
+VarSaldoMedioMensual    # Ver más abajo otro cálculo, y su desviación típica
+
+# Estadística general por meses
+Mensual <- BS %>% group_by(Año = year(Fecha), Mes = month(Fecha)) %>% 
+                  summarize(
+                            n_BS = n(),
+                            n_cobros = sum(Importe>0),
+                            tot_cobros = sum(Importe[Importe>0]),
+                            cobro_medio = mean(Importe[Importe>0]),
+                            n_pagos = sum(Importe<0),
+                            tot_pagos = sum(Importe[Importe<0]),
+                            pago_medio = mean(Importe[Importe<0]),
+                            varsaldo = tot_cobros + tot_pagos,
+                            fin_de_mes = max(Fecha)#, Sirve para escala de gráficos
+                            #otro_fin_de_mes = ceiling_date((make_date(Año, Mes, 1)), unit = "month") - 1
+                           ) %>% 
+                  select(Año, Mes, n_BS, varsaldo, everything()) %>% 
+                  print(n = nrow(BS))
+Mensual
+
+mean(Mensual$varsaldo)
+sd(Mensual$varsaldo)
+
+mean(Mensual$tot_cobros)
+sd(Mensual$tot_cobros)
+
+mean(Mensual$tot_pagos)
+sd(Mensual$tot_pagos)
+
+
+
+ggplot(Mensual) + # GRÁFICO  POR MESES CON INGRESOS, GASTOS Y VARSALDO (Y SUS PROMEDIOS)
+  geom_line(aes(fin_de_mes, tot_cobros), colour="BLUE") +
+  geom_line(aes(fin_de_mes, mean(tot_cobros)), colour="BLUE",linetype = "dotted") +
+  geom_line(aes(fin_de_mes, abs(tot_pagos)), colour="RED") +
+  geom_line(aes(fin_de_mes, mean(abs(tot_pagos))), colour="RED",linetype = "dotdash") +
+  geom_line(aes(fin_de_mes, mean(varsaldo)), colour="GREEN") +
+  geom_line(aes(fin_de_mes, mean(varsaldo)), colour="GREEN",linetype = "dotted")
+
+Total
+
 ggplot(BS, aes(Importe)) +         # Histograma de movimientos por Importe
   geom_histogram(bins = 500)
 
@@ -44,6 +73,7 @@ ggplot(BS, aes(Fecha, Saldo)) +    # Historico de saldos por Fecha
 
 ggplot(BS, aes(Fecha, Importe, colour = (Importe>0))) +
   geom_point()                       # Ingresos y gastos por Fecha
+# Tengo que clasificar los movimientos y colorear (viajes, Pilar, Comunidad, ...)
 
 Cobros <- BS %>% filter(Importe>0)
 ggplot(Cobros, aes(Importe)) +         # Histograma de Ingresos por Importe
@@ -60,14 +90,14 @@ ggplot(Pagos, aes(abs(Importe))) +         # Histograma de Pagos por Importe
 ggplot(Pagos, aes(Fecha, abs(Importe))) + # Pagos por Fecha
 geom_point()
 
-
 Pagos %>% arrange(Importe) %>% print(n=20) # Los 20 mayores
                                            # Los 20 mayores quitando Cajeros y Recibos Raimundo ¡¡VIAJES!!
 Pagos %>% filter(!grepl("Recibo", Concepto), !grepl("Reint", Concepto)) %>% arrange(Importe) %>% print(n=20)
 
 Tarjetas <- BS %>% filter(Codigo=="136")    
-count( Tarjetas)
+count(Tarjetas)
 max(abs(Tarjetas$Importe))
+Tarjetas %>% filter(near(abs(Importe), max(abs(Importe)), tol = 0.01))
 Tarjetas %>% select(Importe, Fecha,Concepto) %>% arrange(Importe, Fecha) %>% print(n=20) # Los 20 mayores
 Tarjetas %>% filter(abs(Importe) == max(abs(Importe)))
 mean(abs(Tarjetas$Importe))
@@ -94,22 +124,35 @@ ggplot(Cajeros, aes(Fecha, Importe)) +    # Historico de retiradas cajero por Fe
 
 
 Comunidad <- BS %>% filter(
-  Codigo=="174" & grepl("Geminis", Concepto)|
-    Codigo=="174" & grepl("Cp Rfv 44", Concepto)|
-    Codigo=="174" & grepl("Recibo Raimundo Fernandez", Concepto)
-)
+                           Codigo=="174" & grepl("Geminis", Concepto)|
+                           Codigo=="174" & grepl("Cp Rfv 44", Concepto)|
+                           Codigo=="174" & grepl("Recibo Raimundo Fernandez", Concepto)
+                           )
 Comunidad %>% print(n=nrow(Comunidad))
 
 # Disparate de evolución Gastos de Comunidad
 ggplot(Comunidad,aes(Fecha,abs(Importe))) +
   geom_point()
 
-
 Comunidad %>% group_by(Año= year(Fecha), Mes=month(Fecha)) %>%  summarize(
   Num = n(),
   Total = sum(Importe),
   Garaje = sum(Importe[grepl("Geminis", Concepto)])
 ) %>% print(n=nrow(Comunidad))
+
+Ingresos_Transferencia <- BS %>% filter(Codigo=="071")
+count(Ingresos_Transferencia)
+
+Ingresos_Transferencia <- BS %>% filter(Codigo=="071", grepl("Casa",Concepto))
+count(Ingresos_Transferencia)
+
+Ingresos_Transferencia <- BS %>% filter(Codigo=="071", grepl("Por Mari",Concepto))
+count(Ingresos_Transferencia)
+
+Ingresos_Transferencia <- BS %>% filter(Codigo=="071", grepl("De Antonio Velazquez",Concepto))
+count(Ingresos_Transferencia)
+
+Ingresos_Transferencia %>% print(n=nrow(Ingresos_Transferencia))
 
 
 LAB <- BS %>%
