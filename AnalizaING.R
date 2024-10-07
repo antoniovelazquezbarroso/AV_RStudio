@@ -59,6 +59,10 @@ Pagos <- ING %>% filter(Importe<0)
 ggplot(Pagos, aes(abs(Importe))) +         # Histograma de Pagos por Importe
   geom_histogram(bins = 500)
 
+Nomina <- ING %>% filter(grepl("Nomina recibida", Descripcion)) 
+Nomina
+Nomina %>% summarize(n(),sum(Importe))
+
 ggplot(Pagos, aes(Fecha, abs(Importe))) + # Pagos por Fecha
 geom_point()
 
@@ -80,19 +84,19 @@ LAB <- ING %>%
                  Ingresos = sum((Importe[Importe>0])),
                  Varsaldo = sum(Importe),                 
 #                 xck=n()-sum(Importe<0)-sum(Importe>0) # Debe ser cero
-                 n_tarjeta = sum(Codigo == "136"),
-                 tarjeta = sum(Importe[Codigo == "136"]),
+                 #n_tarjeta = sum(Codigo == "136"),
+                 #tarjeta = sum(Importe[Codigo == "136"]),
 #                 tarjeta_Ant = sum(Importe[Codigo=="136" & grepl(955303, Concepto)]),
 #                 tarjeta_Eva = sum(Importe[Codigo=="136" & grepl(174534, Concepto)]),
 #                 xck2 = near((tarjeta - tarjeta_Ant -tarjeta_Eva), 0),
-                 n_recibos = sum(Codigo == "174"),
-                 recibos = sum(Importe[Codigo == "174"]),
-                 Comunidad = sum(Importe[Codigo=="174" & grepl("Geminis", Concepto)]) +
-                                     sum(Importe[Codigo=="174" & grepl("Cp Rfv 44", Concepto)]) +
-                                     sum(Importe[Codigo=="174" & grepl("Recibo Raimundo Fernandez", Concepto)]),
-                 Yoigo = sum(Importe[Codigo=="174" & grepl("Yoigo", Concepto)]),
-                 Luz = sum(Importe[Codigo=="174" & grepl("Naturgy", Concepto)]) +
-                       sum(Importe[Codigo=="174" & grepl("Gesternova", Concepto)])
+                 #n_recibos = sum(Codigo == "174"),
+                 #recibos = sum(Importe[Codigo == "174"]),
+                 #Comunidad = sum(Importe[Codigo=="174" & grepl("Geminis", Concepto)]) +
+                 #                    sum(Importe[Codigo=="174" & grepl("Cp Rfv 44", Concepto)]) +
+                 #                    sum(Importe[Codigo=="174" & grepl("Recibo Raimundo Fernandez", Concepto)]),
+                 #Yoigo = sum(Importe[Codigo=="174" & grepl("Yoigo", Concepto)]),
+                 #Luz = sum(Importe[Codigo=="174" & grepl("Naturgy", Concepto)]) +
+                 #      sum(Importe[Codigo=="174" & grepl("Gesternova", Concepto)])
                 )
 LAB
 LAB %>% print(n=nrow(LAB))

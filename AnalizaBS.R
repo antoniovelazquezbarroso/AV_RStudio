@@ -79,6 +79,14 @@ Cobros <- BS %>% filter(Importe>0)
 ggplot(Cobros, aes(Importe)) +         # Histograma de Ingresos por Importe
   geom_histogram(bins = 500)
 
+Cobros <- BS %>% filter(Importe>163)
+ggplot(Cobros, aes(Importe)) +         # Quitando Otros_Ingresos (su max es 162)
+  geom_histogram(bins = 500)
+
+
+
+
+
 Cobros %>% arrange(desc(Importe)) %>% print(n=20) # Los 20 mayores
 count(Cobros)
 sum(Cobros$Importe)
@@ -97,9 +105,15 @@ Pagos %>% filter(!grepl("Recibo", Concepto), !grepl("Reint", Concepto)) %>% arra
 Tarjetas <- BS %>% filter(Codigo=="136")    
 count(Tarjetas)
 max(abs(Tarjetas$Importe))
-Tarjetas %>% filter(near(abs(Importe), max(abs(Importe)), tol = 0.01))
+Tarjetas %>% filter(near(abs(Importe), max(abs(Importe)), tol = 0.01)) # El mayor pago con tarjeta
+#Tarjetas %>% filter(abs(Importe) == max(abs(Importe)))    # Otro máximo
 Tarjetas %>% select(Importe, Fecha,Concepto) %>% arrange(Importe, Fecha) %>% print(n=20) # Los 20 mayores
-Tarjetas %>% filter(abs(Importe) == max(abs(Importe)))
+
+Tarjetas %>% filter(Importe<(-300), !grepl("Reintegro, Atm", Concepto), !grepl("Reint. Cajero", Concepto)) # Solo Importe alto, y excluyendo Cajeros
+
+Pagos_Transferencia <- BS %>% filter(Codigo=="072") %>% arrange(Importe, Fecha) %>% print(n=20) # Los 20 mayores
+
+
 mean(abs(Tarjetas$Importe))
 min(abs(Tarjetas$Importe))
 
@@ -142,6 +156,9 @@ Comunidad %>% group_by(Año= year(Fecha), Mes=month(Fecha)) %>%  summarize(
 
 Ingresos_Transferencia <- BS %>% filter(Codigo=="071")
 count(Ingresos_Transferencia)
+count(Ingresos_Transferencia)/sum(BS$Importe>0) # o tambien dividir por length((BS$Importe[BS$Importe>0]))
+sum(Ingresos_Transferencia$Importe)
+sum(Ingresos_Transferencia$Importe)/sum(BS$Importe[BS$Importe>0])
 
 Ingresos_Transferencia <- BS %>% filter(Codigo=="071", grepl("Casa",Concepto))
 count(Ingresos_Transferencia)
@@ -151,8 +168,19 @@ count(Ingresos_Transferencia)
 
 Ingresos_Transferencia <- BS %>% filter(Codigo=="071", grepl("De Antonio Velazquez",Concepto))
 count(Ingresos_Transferencia)
+sum(Ingresos_Transferencia$Importe)
+
+Ingresos_Transferencia <- BS %>% filter(Codigo=="071", grepl("De Abascal Esteban",Concepto))
+count(Ingresos_Transferencia)
+sum(Ingresos_Transferencia$Importe)
 
 Ingresos_Transferencia %>% print(n=nrow(Ingresos_Transferencia))
+
+Otros_Ingresos <- BS %>% filter(Importe>0,!Codigo=="071")
+Otros_Ingresos
+count(Otros_Ingresos)
+sum(Otros_Ingresos$Importe)
+mean(Otros_Ingresos$Importe)
 
 
 LAB <- BS %>%

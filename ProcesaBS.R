@@ -4,20 +4,28 @@ library(lubridate)
 library(readxl)
 
 # Movimientos 01SEP2022-31AGO2024 por fecha operación orden inverso
-Entrada <- read_excel("data/20220901_20240831.xlsx") 
+Entrada <- read_excel("data/BS_02Sep2022_30Sep2024.xlsx", skip = 7) 
 
     #> names(Entrada)
-    #[1] "Fecha Operación" "Fecha Valor"     "Concepto"        "Importe"         "Divisa...5"      "Saldo"          
-    #[7] "Divisa...7"      "Código"
-    
+    #[1] "Fecha Operación"       "Fecha Valor"           "Concepto"              "Importe"               "Divisa...5"            "Saldo"                
+    #[7] "Divisa...7"            "Código"                "Número de documento"   "Referencia 1"          "Referencia 2"          "Información adicional"
+
 # EN UN PASO
 # Elimina columnas innecesarias, cambia nombres de columnas incómodos
 # Convierte a tipo Date la columna Fecha, incluye NumOrden movimientos del banco,
 # añade la Descripcion del Codigo y ordena por Fecha y NumOrden
 BS <- Entrada %>%
-  select(-`Fecha Valor`,-`Divisa...5`,-`Divisa...7`) %>%
+  select(-`Fecha Valor`,
+         -`Divisa...5`,
+         -`Divisa...7`,
+         -`Número de documento`,
+         -`Referencia 1`,
+         -`Referencia 2`,
+         -`Información adicional`
+        ) %>%
   rename( Fecha = `Fecha Operación`, Codigo = Código) %>%
   mutate(
+         #OtraFecha = dmy(Fecha),
          Fecha = parse_date(Fecha, "%d/%m/%Y"),
          #TextoFecha = format(Fecha, "%d/%m/%Y"),
          NumOrden = (dim(Entrada)[1] - row_number( ) + 1)
@@ -25,7 +33,7 @@ BS <- Entrada %>%
   left_join(unique(read_excel("data/Cods.xlsx")), by = "Codigo") %>% 
   arrange(Fecha, NumOrden) %>% 
   select(Fecha, NumOrden, Importe, Saldo, Codigo, Descripcion, Concepto)
-
+BS
     # names(BS)
     #[1] "Fecha"       "NumOrden"    "Importe"     "Saldo"       "Codigo"      "Descripcion" "Concepto"
 
