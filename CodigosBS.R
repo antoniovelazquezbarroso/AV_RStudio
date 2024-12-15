@@ -12,15 +12,28 @@ Codigos <-  Cods %>%
 Codigos
 rm(Cods)
 
+ggplot(BS, aes(Descripcion)) + geom_bar() + coord_flip()
+
 PorCodigo <- BS %>% 
   group_by(Codigo, Descripcion) %>%
-  summarize(num = n(), total = sum(Importe)) %>%
+  summarize(num = n(), total = sum(Importe), absoluto = abs(total), media = mean(Importe)) %>%
   arrange(desc(num))
 PorCodigo
-ggplot(BS, aes(Descripcion)) + geom_bar() + coord_flip()
+
+ggplot(BS) + geom_bar(aes(Descripcion)) + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = Descripcion, y = num), stat ="identity") + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = reorder(Descripcion, num), y = num), stat ="identity") + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = reorder(Descripcion, -num), y = num), stat ="identity") + coord_flip()
+
 ggplot(PorCodigo) + geom_bar(aes(x = Descripcion, y = total), stat ="identity") + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = reorder(Descripcion, total), y = total), stat ="identity") + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = reorder(Descripcion, absoluto), y = absoluto), stat ="identity") + coord_flip()
 
+ggplot(PorCodigo) + geom_bar(aes(x = Descripcion, y = num), stat ="identity") + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = reorder(Descripcion, num), y = num), stat ="identity") + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = reorder(Descripcion, -num), y = num), stat ="identity") + coord_flip()
 
-
-
+ggplot(PorCodigo) + geom_bar(aes(x = Descripcion, y = media), stat ="identity") + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = reorder(Descripcion, media), y = media), stat ="identity") + coord_flip()
+ggplot(PorCodigo) + geom_bar(aes(x = reorder(Descripcion, absoluto), y = absoluto), stat ="identity") + coord_flip()
 

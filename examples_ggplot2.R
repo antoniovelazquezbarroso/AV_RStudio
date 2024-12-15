@@ -200,7 +200,6 @@ ggplot(data = diamonds) +
 ggplot(data = diamonds) +
   geom_histogram(mapping = aes(x = price, fill = cut), binwidth = 200)
 
-
 # POLÍGONO DE FRECUENCIAS
 ggplot(data = diamonds) +
   geom_freqpoly(mapping = aes(x = price), binwidth = 200)

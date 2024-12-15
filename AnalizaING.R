@@ -74,7 +74,7 @@ Pagos %>% arrange(Importe) %>% print(n=20) # Los 20 mayores
 
 #=====================================
 
-LAB <- ING %>%
+SaldosMes <- ING %>%
 #  group_by(Año = year(Fecha), Mes = month(Fecha), Codigo, Descripcion) %>% 
        group_by(Año = year(Fecha), Mes = month(Fecha)) %>% 
        summarise(num = n(),
@@ -98,33 +98,33 @@ LAB <- ING %>%
                  #Luz = sum(Importe[Codigo=="174" & grepl("Naturgy", Concepto)]) +
                  #      sum(Importe[Codigo=="174" & grepl("Gesternova", Concepto)])
                 )
-LAB
-LAB %>% print(n=nrow(LAB))
+SaldosMes
+SaldosMes %>% print(n=nrow(SaldosMes))
 
 
-mean(LAB$ingresos)
-mean(LAB$gastos)
-max(LAB$gastos)
-min(LAB$gastos)
+mean(SaldosMes$Ingresos)
+mean(SaldosMes$Gastos)
+max(SaldosMes$Gastos)
+min(SaldosMes$Gastos)
 
 
 
-LAB %>% summarise(n())                  # ENSEÑA FILAS POR AÑO. ??????
-LAB %>% summarise(MaxGasto = max(LAB$gastos),
-                  MedGasto = mean(LAB$gastos),
-                  MinGasto = min(LAB$gastos)
+SaldosMes %>% summarise(n())                  # ENSEÑA FILAS POR AÑO. ??????
+SaldosMes %>% summarise(MaxGasto = max(SaldosMes$Gastos),
+                  MedGasto = mean(SaldosMes$Gastos),
+                  MinGasto = min(SaldosMes$Gastos)
                  )
 
 
-LAB %>% select(Año, Mes, Comunidad) %>% print(n=24)
-LAB$Comunidad
-mean(LAB$Comunidad)
-mean(LAB$Comunidad[LAB$Año == 2023])
-mean(LAB$Comunidad[LAB$Año == 2024])
+SaldosMes %>% select(Año, Mes, Comunidad) %>% print(n=24)
+SaldosMes$Comunidad
+mean(SaldosMes$Comunidad)
+mean(SaldosMes$Comunidad[SaldosMes$Año == 2023])
+mean(SaldosMes$Comunidad[SaldosMes$Año == 2024])
 
 
 
-LAB <- ING %>%
+SaldosMes <- ING %>%
   group_by(year(Fecha), month(Fecha), Codigo, Descripcion) %>%  
   summarise(
     n(),
@@ -142,5 +142,5 @@ LAB <- ING %>%
     first(Fecha)
   ) %>%
   arrange(desc(`sum(Importe)`))
-LAB 
+SaldosMes 
 
