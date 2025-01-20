@@ -116,31 +116,5 @@ SaldosMes %>% summarise(MaxGasto = max(SaldosMes$Gastos),
                  )
 
 
-SaldosMes %>% select(Año, Mes, Comunidad) %>% print(n=24)
-SaldosMes$Comunidad
-mean(SaldosMes$Comunidad)
-mean(SaldosMes$Comunidad[SaldosMes$Año == 2023])
-mean(SaldosMes$Comunidad[SaldosMes$Año == 2024])
 
-
-
-SaldosMes <- ING %>%
-  group_by(year(Fecha), month(Fecha), Codigo, Descripcion) %>%  
-  summarise(
-    n(),
-    sum(Importe),
-    max(Importe),
-    min(Importe),
-    mean(Importe),
-    (sum(Importe)/n()),
-    first(NumOrden),
-    Saldo[NumOrden == first(NumOrden)],
-    Importe[NumOrden == first(NumOrden)],
-    Inicial = Saldo[NumOrden == first(NumOrden)] 
-    - Importe[NumOrden == first(NumOrden)],
-    min(Fecha),
-    first(Fecha)
-  ) %>%
-  arrange(desc(`sum(Importe)`))
-SaldosMes 
 

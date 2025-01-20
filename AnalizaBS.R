@@ -63,7 +63,6 @@ ggplot(Mensual) + # GRÁFICO  POR MESES CON INGRESOS, GASTOS Y VARSALDO (Y SUS P
   geom_line(aes(fin_de_mes, mean(varsaldo)), colour="GREEN") +
   geom_line(aes(fin_de_mes, mean(varsaldo)), colour="GREEN",linetype = "dotted")
 
-Total
 
 ggplot(BS, aes(Importe)) +         # Histograma de movimientos por Importe
   geom_histogram(bins = 500)
