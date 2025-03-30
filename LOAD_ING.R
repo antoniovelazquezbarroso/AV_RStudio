@@ -1,7 +1,7 @@
 # IMPORTA DESDE EXCEL MOVIMIENTOS ING (Entrada) Y LOS TRANSFORMA (ING)
 
 library(tidyverse)
-library(lubridate)
+#library(lubridate) # NO HAY QUE LLAMARLO APARTE, VA CON TIDYVERSE
 library(readxl)
 
 # Movimientos 01SEP2022-31DICIEMBRE2024 por fecha operación orden inverso

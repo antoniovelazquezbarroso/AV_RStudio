@@ -1,6 +1,6 @@
 # IMPORTA DESDE EXCEL MOVIMIENTOS BS  (Entrada) Y LOS TRANSFORMA (BS)
 library(tidyverse)
-library(lubridate)
+#library(lubridate) # NO HAY QUE LLAMARLO APARTE, VA CON TIDYVERSE
 library(readxl)
 
 # Movimientos 01SEP2022-31AGO2024 por fecha operación orden inverso
@@ -38,3 +38,4 @@ BS
     #[1] "Fecha"       "NumOrden"    "Importe"     "Saldo"       "Codigo"      "Descripcion" "Concepto"
 
 rm(Entrada)
+

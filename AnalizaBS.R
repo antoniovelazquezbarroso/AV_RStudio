@@ -1,4 +1,4 @@
-source("ProcesaBS.R")
+source("LOAD_BS.R")
 
 n_meses <- ceiling(interval(first(BS$Fecha),last(BS$Fecha))/dmonths(1))
 n_meses                              # Para varios cálculos luego
@@ -79,8 +79,8 @@ ggplot(Cobros, aes(Importe)) +         # Histograma de Ingresos por Importe
   geom_histogram(bins = 500)
 
 Cobros <- BS %>% filter(Importe>163)
-ggplot(Cobros, aes(Importe)) +         # Quitando Otros_Ingresos (su max es 162)
-  geom_histogram(bins = 500)
+ggplot(Cobros, aes(Importe)) +         # Quitando Otros_Ingresos 
+  geom_histogram(bins = 500)           # Son devoluciones de compras (su max es 162)
 
 
 

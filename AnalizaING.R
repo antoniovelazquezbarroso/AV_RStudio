@@ -1,4 +1,4 @@
-source("ProcesaING.R")
+source("LOAD_ING.R")
 
 n_meses <- ceiling(interval(first(ING$Fecha),last(ING$Fecha))/dmonths(1))
 n_meses                              # Para varios cálculos luego
@@ -50,11 +50,13 @@ Cobros <- ING %>% filter(Importe>0)
 ggplot(Cobros, aes(Importe)) +         # Histograma de Ingresos por Importe
   geom_histogram(bins = 500)
 
-Cobros %>% arrange(desc(Importe)) %>% print(n=20) # Los 20 mayores
+Cobros %>% arrange(desc(Importe)) %>% print(n=nrow(Cobros)) # Los 20 mayores
 count(Cobros)
 sum(Cobros$Importe)
 
 Pagos <- ING %>% filter(Importe<0)
+
+Pagos %>% filter(Importe>-2000)     # Gastos Corrientes
 
 ggplot(Pagos, aes(abs(Importe))) +         # Histograma de Pagos por Importe
   geom_histogram(bins = 500)
@@ -100,7 +102,6 @@ SaldosMes <- ING %>%
                 )
 SaldosMes
 SaldosMes %>% print(n=nrow(SaldosMes))
-
 
 mean(SaldosMes$Ingresos)
 mean(SaldosMes$Gastos)
