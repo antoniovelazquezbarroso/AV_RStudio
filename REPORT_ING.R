@@ -270,7 +270,7 @@ ggplot(FLAG, aes(x=Fecha_Final, y=Importe, fill=Categoria)) +
 
 # Totalizo Importes por Fecha_Final y Categoria
 # Para graficos stack y dodge (con totales netos por categoria)
-GROUPED_FLAG <- FLAG %>% filter(Gasto_Cte) %>%
+GROUPED_FLAG <- FLAG %>% filter(Categoria=="Gasto_Cte") %>%
   group_by(Fecha_Final, Categoria) %>%
   summarise(Suma=sum(Importe))
 

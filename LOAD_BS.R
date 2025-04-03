@@ -4,7 +4,7 @@ library(tidyverse)
 library(readxl)
 
 # Movimientos 01SEP2022-31AGO2024 por fecha operación orden inverso
-Entrada <- read_excel("data/BS_02Sep2022_31Dic2024.xlsx", skip = 7) 
+Entrada <- read_excel("data/BS_02Sep2022_31Mar2025.xlsx", skip = 7) 
 
     #> names(Entrada)
     #[1] "Fecha Operación"       "Fecha Valor"           "Concepto"              "Importe"               "Divisa...5"            "Saldo"                
