@@ -24,11 +24,6 @@ FLAG <- FLAG %>%
                         grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
                         grepl("Reint", Concepto)&
                         !abs(Importe) > 500
-                       )|
-                       (
-                        grepl("PAGO EN EFECTIVO", Descripcion)&
-                        grepl("Retirada De Efectivo En Cajero", Concepto)&
-                        !abs(Importe) > 500
                        ),
 
               # Recibos                            
@@ -54,14 +49,9 @@ FLAG <- FLAG %>%
                                (grepl("ABONO DE OPERACION CON TARJETA", Descripcion)|
                                 grepl("ABONOS VARIOS CONCEPTOS", Descripcion)|
                                 grepl("ADEUDO INTER/COMIS/GASTOS", Descripcion)|
-                                (grepl("PAGO EN EFECTIVO", Descripcion)&
-                                   !(grepl("Retirada De Efectivo En Cajero", Concepto)&
-                                     !abs(Importe) > 500
-                                    )
-                                 )
-                               )
-                              ),
-                         
+                                grepl("PAGO EN EFECTIVO", Descripcion)                       
+                               ) 
+                              ), 
               
               # Cargos Tarjeta excepto Cajeros y mayores de €200       
               # Transferencias Emitidas mayores de €200 (menores van a Tarjeta_Cte)
@@ -215,8 +205,9 @@ mutate(Categoria = case_when( #Inicio de case_when
 #    CHECK <- FLAG$Transferencias +
 #      FLAG$Servicio +
 #      FLAG$Recibos +
-#      FLAG$Gasto_Corriente +
-#      FLAG$Gasto_Otro  == 1
+#      FLAG$Gasto_Cte +
+#      FLAG$Gasto_Otr +
+#      FLAG$Patrimonio == 1
 #  )
 #  CHECK[FALSE]
 #  remove(CHECK)
@@ -264,7 +255,7 @@ FLAG <- FLAG %>% mutate(Fecha_Final=as_date(ceiling_date(Fecha, unit = "quarter"
 #================================================================================
 
 #           TOTALIZANDO IMPORTES POR FECHA_FINAL Y CATEGORIA DESDE VARIABLES FILTRO
-FLAG <- FLAG %>% filter(Fecha_Final>"2022-09-30")
+FLAG <- FLAG %>% filter(Fecha_Final>"2022-12-31")
 REFLAG <- FLAG %>% 
          arrange(Fecha_Final) %>%                 # Asegurar el orden por fechas
          group_by(Fecha_Final) %>%      # Calcular Totales por Fecha y Categoria 
@@ -281,10 +272,7 @@ REFLAG <- FLAG %>%
                    #sdGasto_Corriente=sd(Importe[Gasto_Corriente]),
                    Gasto_Otro=sum(Importe[Gasto_Otro]),
                    Check=sum(Importe[Check]),
-                   Gastos=sum(Importe[Gastos]),
-                   Comunidad=sum(Importe[Comunidad]),
-                   Telefono=sum(Importe[Telefono]),
-                   Luz=sum(Importe[Luz])
+                   Gastos=sum(Importe[Gastos])
                   ) # %>% 
 #         select(Fecha_Final, Transferencias, Gasto_Otro, Gasto_Corriente, Recibos, Servicio)
 #===============================================================================
@@ -292,19 +280,10 @@ REFLAG <- FLAG %>%
 #            CALCULANDO VALORES A PARTIR DE LOS TOTALES, AÑADIRLOS A REFLAG
 
 REFLAG$Gasto_Corriente
-( Anterior <- lag(REFLAG$Gasto_Corriente) )
-
-#summary(REFLAG$Gasto_Corriente)
-summary(abs(REFLAG$Gasto_Corriente))
-
 sum(REFLAG$Gasto_Corriente)
+( Anterior <- lag(REFLAG$Gasto_Corriente) )
 mean(REFLAG$Gasto_Corriente) # Promedia los totales de todos los periodos
 sd(REFLAG$Gasto_Corriente)
-
-#summary(REFLAG$Gasto_Otro)
-summary(abs(REFLAG$Gasto_Otro))
-
-sum(REFLAG$Gasto_Otro)
 mean(REFLAG$Gasto_Otro)
 sd(REFLAG$Gasto_Otro)
 
@@ -322,9 +301,7 @@ REFLAG %>% mutate(G_Cte_lag=lag(Gasto_Corriente),
            print(n=nrow(REFLAG))
 
                   # # Añadiendo campos calculados al propio REFLAG
-REFLAG <- REFLAG %>% mutate(G_Cte_MM3=MM3(Gasto_Corriente),
-                            G_Otr_MM3=MM3(Gasto_Otro)
-                           )
+REFLAG <- REFLAG %>% mutate(G_Cte_MM3=MM3(Gasto_Corriente))
 
 #=================================================================================
 
@@ -383,67 +360,6 @@ ggplot(REFLAG) +                      # GRÁFICO LINEAS POR MESES CON INGRESOS, 
   geom_line(aes(Fecha_Final, abs(Recibos)), colour="BLACK",linetype = "dotdash") +
   geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="BLUE") +
   geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="RED")
-
-
-ggplot(REFLAG) +                      # GRÁFICO LINEAS RECIBOS DESAGREGADO
-#  geom_line(aes(Fecha_Final, abs(Transferencias)), colour="RED", linetype = "dotted") +
-#  geom_line(aes(Fecha_Final, abs(Gastos)), colour="BLUE",linetype = "dotted") +
-#  geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="GREEN") +
-#  geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="ORANGE")+
-#  geom_line(aes(Fecha_Final, abs(Servicio)), colour="DARKGREY")+
-  geom_line(aes(Fecha_Final, abs(Recibos)), colour="BLACK",linetype = "dotdash") +
-  geom_line(aes(Fecha_Final, abs(Comunidad)), colour="BLUE") +
-  geom_line(aes(Fecha_Final, abs(Telefono)), colour="RED") +
-  geom_line(aes(Fecha_Final, abs(Luz)), colour="YELLOW") 
-
-
-ggplot(REFLAG) +            # GRÁFICO LINEAS RECIBOS DESAGREGADO, ANALISIS COMUNIDAD
-  #  geom_line(aes(Fecha_Final, abs(Transferencias)), colour="RED", linetype = "dotted") +
-  #  geom_line(aes(Fecha_Final, abs(Gastos)), colour="BLUE",linetype = "dotted") +
-  #  geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="GREEN") +
-  #  geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="ORANGE")+
-  #  geom_line(aes(Fecha_Final, abs(Servicio)), colour="DARKGREY")+
-  geom_line(aes(Fecha_Final, abs(Recibos)), colour="BLACK",linetype = "dotdash") +
-  geom_line(aes(Fecha_Final, abs(Comunidad)), colour="BLUE") +
-  #geom_line(aes(Fecha_Final, abs(Telefono)), colour="RED") +
-  #geom_line(aes(Fecha_Final, abs(Luz)), colour="YELLOW")+
-  geom_line(aes(Fecha_Final, abs(MM3(Comunidad))), colour="GREEN")+
-  geom_line(aes(Fecha_Final, abs(mean(Comunidad))), colour="DARKORANGE",linetype = "dotdash")
-
-
-ggplot(REFLAG) +                      # GRÁFICO LINEAS GASTOS DESAGREGADO
-#  geom_line(aes(Fecha_Final, abs(Transferencias)), colour="RED", linetype = "dotted") +
-  geom_line(aes(Fecha_Final, abs(Gastos)), colour="BLUE",linetype = "dotted") +
-  geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="GREEN") +
-  geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="ORANGE")+
-  geom_line(aes(Fecha_Final, abs(Servicio)), colour="DARKGREY")+
-  geom_line(aes(Fecha_Final, abs(Recibos)), colour="BLACK",linetype = "dotdash") #+
-#  geom_line(aes(Fecha_Final, abs(Comunidad)), colour="BLUE") +
-#  geom_line(aes(Fecha_Final, abs(Telefono)), colour="RED") +
-#  geom_line(aes(Fecha_Final, abs(Luz)), colour="YELLOW") 
-
-
-ggplot(REFLAG) +                      # GRÁFICO LINEAS GASTO CORRIENTE, MEDIA Y MM3
-  #  geom_line(aes(Fecha_Final, abs(Transferencias)), colour="RED", linetype = "dotted") +
-  geom_line(aes(Fecha_Final, abs(Gastos)), colour="BLUE",linetype = "dotted") +
-  geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="GREEN") +
-  geom_line(aes(Fecha_Final, abs(mean(Gasto_Corriente))), colour="ORANGE")+
-  geom_line(aes(Fecha_Final, abs(G_Cte_MM3)), colour="BLACK",linetype = "dotdash") 
-
-ggplot(REFLAG) +                      # GRÁFICO LINEAS GASTO OTRO, MEDIA Y MM3
-  #  geom_line(aes(Fecha_Final, abs(Transferencias)), colour="RED", linetype = "dotted") +
-  geom_line(aes(Fecha_Final, abs(Gastos)), colour="BLUE",linetype = "dotted") +
-  geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="GREEN") +
-  geom_line(aes(Fecha_Final, abs(mean(Gasto_Otro))), colour="ORANGE")+
-  geom_line(aes(Fecha_Final, abs(G_Otr_MM3)), colour="BLACK",linetype = "dotdash") 
-
-
-
-
-
-
-
-
 
 
 ggplot(REFLAG) +                      # GRÁFICO PUNTOS POR MESES CON INGRESOS, GASTOS 
@@ -563,7 +479,7 @@ ggplot(FLAG, aes(x=Fecha_Final, y=Importe, fill=Categoria)) +
 
                            # Totalizo Importes por Fecha_Final y Categoria
                            # Para graficos stack y dodge (con totales netos por categoria)
-GROUPED_FLAG <- FLAG %>% filter(TRUE) %>%
+GROUPED_FLAG <- FLAG %>% filter(Gasto_Corriente) %>%
                            group_by(Fecha_Final, Categoria) %>%
                            summarise(Suma=sum(Importe))
 
