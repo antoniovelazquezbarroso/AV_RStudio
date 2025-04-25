@@ -24,7 +24,9 @@ FLAG <- FLAG %>%
 
 FLAG <- FLAG %>% mutate(
         Total_Gasto = Casa | Recibo_Cte | Gasto_Cte | Recibo_Otr | Gasto_Otr,
-        Total_sin_Casa = Recibo_Cte | Gasto_Cte | Recibo_Otr | Gasto_Otr
+        Total_sin_Casa = Recibo_Cte | Gasto_Cte | Recibo_Otr | Gasto_Otr,
+        Gastos = Gasto_Cte | Gasto_Otr,
+        Recibos = Recibo_Cte | Recibo_Otr
 
 #    Recibos = Comunidad | Telefono | Luz ,
 #    Gastos = Servicio | Recibos | Gasto_Cte | Gasto_Otro ,
@@ -46,8 +48,8 @@ FLAG <- FLAG %>% mutate(
 REPORT <- FLAG
 REPORT <- REPORT %>% 
 # filter(Fecha_Final > "2022-09-30",
-#        Fecha_Final =< "2025-03-31") %>%  # Elegir Fecha de Inicio y/o Final
-# filter(Total_Gasto)
+#        Fecha_Final =< "2025-03-31") %>%  # Elegir Fechas de Inicio y/o Final
+# filter(Total_Gasto)         # Cualquier otro Filtro (Gastos, Recibos, Grandes)                    
   arrange(Fecha_Final) %>%                 # Asegurar el orden por fechas
   group_by(Fecha_Final) %>%           # Calcular Totales por Fecha y Categoria 
   summarise(Numero=n(),               # (lo que elijas definir en el "summarise" 
@@ -64,6 +66,8 @@ REPORT <- REPORT %>%
 #            Otro_Total_Gasto=Casa+Recibo_Cte+Gasto_Cte+Recibo_Otr+Gasto_Otr,
             Total_sin_Casa=sum(Importe[Total_sin_Casa]),
 #            Otro_Total_sin_Casa=Recibo_Cte+Gasto_Cte+Recibo_Otr+Gasto_Otr,
+            Gastos=sum(Importe[Gastos]),
+            Recibos=sum(Importe[Recibos]),
             Patrimonio=sum(Importe[Patrimonio]),                 
             # Promedia entre movimientos dentro del periodo
             #avGasto_Cte=mean(Importe[Gasto_Cte]), 
@@ -80,11 +84,11 @@ REPORT <- REPORT %>%
                              )
             )
   ) #  %>% 
-#  select(Fecha_Final, Casa, Recibo_Cte, Recibo_Otr, Gasto_Otr, Patrimonio)
-#  select(Fecha_Final, Casa:Total_sin_Casa)
+#  select(Fecha_Final, Casa, Recibo_Cte, Recibo_Otr, ... , Patrimonio)
+#  select(Fecha_Final, Casa:Recibos)
 
 #===============================================================================
-#       CALCULANDO VALORES A PARTIR DE LOS TOTALES, AÑADIRLOS A REPORT
+#    CALCULANDO VALORES A PARTIR DE LOS TOTALES, PARA AÑADIRLOS A REPORT
 
 REPORT$Gasto_Cte
 ( Anterior <- lag(REPORT$Gasto_Cte) )
@@ -132,7 +136,8 @@ quantile(abs(REPORT$Gasto_Cte), prob=0.25)
 quantile(abs(REPORT$Gasto_Cte), prob=0.75)
 quantile(abs(REPORT$Gasto_Cte), prob=0.00)
 quantile(abs(REPORT$Gasto_Cte), prob=1.00)
-MM3(abs(REPORT$Total_Gasto))
+MM3(abs(REPORT$Gasto_Cte))
+MM3(abs(REPORT$Gasto_Cte))
 
 #summary(REPORT$Total_Gasto)
 summary(abs(REPORT$Total_Gasto))
@@ -148,7 +153,7 @@ quantile(abs(REPORT$Total_Gasto), prob=0.75)
 quantile(abs(REPORT$Total_Gasto), prob=0.00)
 quantile(abs(REPORT$Total_Gasto), prob=1.00)
 MM3(abs(REPORT$Total_Gasto))
-
+MM4(abs(REPORT$Total_Gasto))
 
 # Añadiendo campos calculados para un cálculo ad-hoc
 REPORT %>% mutate(G_Cte_lag=lag(Gasto_Cte),
@@ -165,8 +170,6 @@ REPORT <- REPORT %>% mutate(G_Cte_MM3=MM3(Gasto_Cte))
 REPORT <- REPORT %>% mutate(G_Cte_MM3=MM3(Gasto_Cte),
                             Total_Gasto_MM3=MM3(Total_Gasto)
                             )
-
-
 
 #===============================================================================
 #          TOTALIZANDO IMPORTES POR CATEGORIA DESDE VARIABLE CATEGORÍA
@@ -233,6 +236,31 @@ ggplot(REPORT) +                      # GRÁFICO LINEAS POR MESES CON INGRESOS, 
             )
 
 
+
+ggplot(REPORT) +                      # GRÁFICO LINEAS POR MESES CON INGRESOS, GASTOS 
+  #  geom_line(aes(Fecha_Final, abs(Transferencias)), colour="RED", linetype = "dotted") +
+  #  geom_line(aes(Fecha_Final, abs(Nomina)), colour="BLUE",linetype = "dotted") +
+  #  geom_line(aes(Fecha_Final, abs(Gastos)-abs(Gasto_Otro)), colour="RED",linetype = "dotdash") +
+#  geom_line(aes(Fecha_Final, abs(Casa)), colour="GREEN") +
+  geom_line(aes(Fecha_Final, abs(Total_sin_Casa)), colour="BLACK") +
+  geom_line(aes(Fecha_Final, abs(Recibos)), colour="YELLOW") +
+#  geom_line(aes(Fecha_Final, abs(Recibo_Otr)), colour="BLACK",linetype = "dotdash") +
+  geom_line(aes(Fecha_Final, abs(Gasto_Cte)), colour="BLUE") +
+  geom_line(aes(Fecha_Final, abs(Gasto_Otr)), colour="RED") +
+  geom_line(aes(Fecha_Final, mean(abs(Gasto_Otr))), colour="PINK") # +
+#  geom_line(aes(Fecha_Final, (abs(Casa)+
+#                                abs(Recibo_Cte)+
+#                                abs(Recibo_Otr)+
+#                                abs(Gasto_Cte)+
+#                                abs(Gasto_Otr)
+#  )
+#  ), colour="DARKGREY")
+  
+
+
+
+
+
 # ggplot(REPORT) +                      # GRÁFICO PUNTOS POR MESES CON INGRESOS, GASTOS 
 #   #  geom_point(aes(Fecha_Final, abs(Transferencias)), colour="RED") +
 #   geom_point(aes(Fecha_Final, abs(Nomina)), colour="BLUE", shape=11) +
@@ -286,19 +314,61 @@ ggplot(REPORT) +                      # GRÁFICO LINEAS POR MESES CON INGRESOS, 
 
 #===============================================================================
 
-#  NO VA, NECESITA FECHA_FINAL, que no está ahora en Report ni en FLAG
-#  HAY QUE REESTRUCTURAR, LOS GRAFICOS POR CATEGORIAS EN BARRAS
-#. NECESITAN ARRANCAR DESDE LOS MOVIMIENTOS, NO DESDE SUS TOTALES ????
+#   LOS GRAFICOS POR CATEGORIAS EN BARRAS
+#   NECESITAN ARRANCAR DESDE LOS MOVIMIENTOS (FLAG), NO DESDE TOTALES (REPORT)
+
 XXX <- FLAG
 XXX <- XXX %>% filter(!Nomina,!Patrimonio)
 XXX <- XXX %>% group_by(Fecha_Final, Categoria) %>% 
                summarise(Suma=sum(Importe))
 
-#   Eliminando además lo de casa
-#  XXX <- REPORT
-#  XXX <- XXX %>% filter(!Nomina,!Patrimonio,!Casa)
-#  XXX <- XXX %>% group_by(Fecha_Final, Categoria) %>% 
-#    summarise(Suma=sum(Importe))
+XXX <- FLAG
+XXX <- XXX %>% filter(Total_Gasto)
+XXX <- XXX %>% group_by(Fecha_Final, Categoria) %>% 
+  summarise(Suma=sum(Importe))
+
+XXX <- FLAG
+XXX <- XXX %>% filter(Total_sin_Casa)
+XXX <- XXX %>% group_by(Fecha_Final, Categoria) %>% 
+  summarise(Suma=sum(Importe))
+
+XXX <- FLAG
+XXX <- XXX %>% filter(Recibos)
+XXX <- XXX %>% group_by(Fecha_Final, Categoria) %>% 
+       summarise(Suma=sum(Importe))
+
+
+XXX <- FLAG
+XXX <- XXX %>% filter(Recibos)
+XXX <- XXX %>% mutate(Categoria_ORD = factor(Categoria, levels= c("Recibo_Cte", "Recibo_Otr")))
+XXX <- XXX %>% group_by(Fecha_Final, Categoria) %>% 
+  summarise(Suma=sum(Importe))
+
+ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
+  geom_col()
+
+ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
+  geom_col()
+
+
+
+
+
+
+ll=unique(XXX$Categoria)
+ll 
+XXX %>% mutate(Cat_Ord=factor()) 
+  
+ll=unique(XXX$Categoria)
+DDD <- FLAG %>% filter(Total_Gasto) %>%    
+  mutate(Cat_Ord = factor(Categoria, levels = rev(Cat_levels)) ) 
+
+ggplot(DDD, aes(x=Fecha_Final, y=abs(Importe), fill=Cat_Ord)) +
+  geom_bar(position='stack', stat='identity')
+
+
+
+
 
 
 ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
@@ -434,7 +504,8 @@ ggplot(DDD, aes(x=Fecha_Final, y=Importe, fill=Categoria)) +
 ggplot(DDD, aes(x=Fecha_Final, y=abs(Importe), fill=Categoria)) +
   geom_col(position='dodge')
 
-
+#============================================================================
+# ORDENAR LAS CATEGORIAS EN LOS GRAFICOS APILADOS
 
 # Son todas las Categorías, por su orden default
 Cat=sort(unique(FLAG$Categoria))
@@ -449,23 +520,45 @@ Cat_levels=c("Telefono","Comunidad","Otros","Cajero","Luz","Transferencias","NC"
 length(Cat)==length(Cat_levels)     # CHECK HAY TANTOS NIVELES COMO CATEGORIAS
 
 
-#============================================================================
-# ORDENAR LAS CATEGORIAS EN LOS GRAFICOS APILADOS
 
-# En DDD por orden de Cat_levels para el grafico
+
+Cat_levels = sort(unique(FLAG$Categoria))
+Cat_levels
+Cat_levels = rev(sort(unique(FLAG$Categoria)))
+Cat_levels
+Cat_levels = c("Recibo_Cte", "Recibo_Otr","Gasto_Cte","Gasto_Otr", "Casa")
+Cat_levels
+
+
+# En XXX por orden de Cat_levels para el grafico
 # Si quieres, las filtras antes, p.e. filter(Importe<0,!Categoria=="NC")
-DDD <- FLAG %>% filter(Gastos) %>%    
-  mutate(Cat_Ord = factor(Categoria, levels = rev(Cat_levels)) ) 
 
-ggplot(DDD, aes(x=Fecha_Final, y=abs(Importe), fill=Cat_Ord)) +
-  geom_bar(position='stack', stat='identity')
+#  Cat_levels = sort(unique(FLAG$Categoria))
+#  Cat_levels
+#  Cat_levels = rev(sort(unique(FLAG$Categoria)))
+#  Cat_levels
+  Cat_levels = c("Recibo_Cte", "Recibo_Otr","Gasto_Cte","Gasto_Otr", "Casa")
+#               Define orden desde abajo hacia arriba en el stack
+#               y de derecha a izquierda en el dodge
+#               Ordénalas para el grafico
 
-ggplot(DDD, aes(x=Fecha_Final, y=abs(Importe), fill=Cat_Ord)) +
+XXX <- FLAG %>% 
+       filter(Total_Gasto) %>%
+       mutate(Cat_Ord = factor(Categoria, levels = Cat_levels)) 
+
+ggplot(XXX, aes(x=Fecha_Final, y=abs(Importe), fill=Cat_Ord)) +
   geom_col(position='stack')
+
+ggplot(XXX, aes(x=Fecha_Final, y=abs(Importe), fill=Categoria)) +
+  geom_col(position='stack')
+
+
+
 
 ggplot(DDD, aes(x=Fecha_Final, y=abs(Importe), fill=Cat_Ord)) +
   geom_col() + 
   geom_line(y=abs(Importe))
 
-ggplot(DDD, aes(x=Fecha_Final, y=abs(Importe), fill=Cat_Ord)) +
+ggplot(XXX, aes(x=Fecha_Final, y=abs(Importe), fill=Cat_Ord)) +
   geom_col(position="dodge")
+
