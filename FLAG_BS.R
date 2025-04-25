@@ -298,8 +298,17 @@ REFLAG$Gasto_Corriente
 summary(abs(REFLAG$Gasto_Corriente))
 
 sum(REFLAG$Gasto_Corriente)
+length(REFLAG$Gasto_Corriente)
 mean(REFLAG$Gasto_Corriente) # Promedia los totales de todos los periodos
 sd(REFLAG$Gasto_Corriente)
+max(abs(REFLAG$Gasto_Corriente))
+min(abs(REFLAG$Gasto_Corriente))
+median(abs(REFLAG$Gasto_Corriente))
+quantile(abs(REFLAG$Gasto_Corriente), prob=0.25)
+quantile(abs(REFLAG$Gasto_Corriente), prob=0.75)
+quantile(abs(REFLAG$Gasto_Corriente), prob=0.00)
+quantile(abs(REFLAG$Gasto_Corriente), prob=1.00)
+
 
 #summary(REFLAG$Gasto_Otro)
 summary(abs(REFLAG$Gasto_Otro))
@@ -394,7 +403,7 @@ ggplot(REFLAG) +                      # GRÁFICO LINEAS RECIBOS DESAGREGADO
   geom_line(aes(Fecha_Final, abs(Recibos)), colour="BLACK",linetype = "dotdash") +
   geom_line(aes(Fecha_Final, abs(Comunidad)), colour="BLUE") +
   geom_line(aes(Fecha_Final, abs(Telefono)), colour="RED") +
-  geom_line(aes(Fecha_Final, abs(Luz)), colour="YELLOW") 
+  geom_line(aes(Fecha_Final, abs(Luz)), colour="GREEN") 
 
 
 ggplot(REFLAG) +            # GRÁFICO LINEAS RECIBOS DESAGREGADO, ANALISIS COMUNIDAD
