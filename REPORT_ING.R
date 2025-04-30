@@ -46,8 +46,8 @@ FLAG <- FLAG %>% mutate(
 #     Y POR CATEGORIA DESDE VARIABLES FILTRO,
 #     O CALCULANDO NUEVOS VALORES (p.e. TOTALES O SUBTOTALES DESDE MOVIMIENTOS)
 
-REPORT <- FLAG
-REPORT <- REPORT %>% 
+
+REPORT <- FLAG %>% 
 # filter(Fecha_Final > "2022-09-30",
 #        Fecha_Final =< "2025-03-31") %>%  # Elegir Fechas de Inicio y/o Final
 # filter(Total_Gasto)         # Cualquier otro Filtro (Gastos, Recibos, Grandes)                    
@@ -119,6 +119,27 @@ MyStats <- function(MiVar){mean=mean(-MiVar)
                            max=max(-MiVar)
                            return(c(mean, num, sd, skew, kurt, min, q1,med, q3, max))
                           }
+MyStats(REPORT$Gasto_Cte)
+
+summary6 <- function(data, var) {
+  data |> summarize(
+    min = min({{ var }}, na.rm = TRUE),
+    q1=quantile({{ var }}, prob=0.25),
+    mean = mean({{ var }}, na.rm = TRUE),
+    median = median({{ var }}, na.rm = TRUE),
+    q3=quantile({{ var }}, prob=0.75),
+    max = max({{ var }}, na.rm = TRUE),
+    n = n(),
+    n_miss = sum(is.na({{ var }})),
+    sd=sd({{ var }}),
+    skew = sum({{ var }}-mean)^3/sd^3/n,
+    kurt = sum({{ var }}-mean)^4/sd^4/n - 3,  
+    .groups = "drop"
+  )
+}
+summary6(REPORT, Gasto_Cte)
+
+
 
 TT <- REPORT %>% select(Casa:Recibos)
 (Columnas <- names(TT))
@@ -128,8 +149,8 @@ sapply(TT[Columnas], MyStats)
 library(car)
 scatterplotMatrix(TT)
 
-
-
+# NO VA
+####. TT |> mutate(across({{Casa}}:{{Recibos}}, MyStats))
 
 
 
@@ -386,6 +407,8 @@ ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
   geom_col(position="dodge")
 
 # PUEDES ORDENAR LAS BARRAS COMO QUIERAS 
+
+# Recibos Ordenado
 # Por default el campo categoría es texto, y lo ordena alfabéticamente
 XXX <- FLAG %>% filter(Recibos) %>% 
                 group_by(Fecha_Final, Categoria) %>% 
@@ -393,6 +416,9 @@ XXX <- FLAG %>% filter(Recibos) %>%
 
 ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
   geom_col()
+
+ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
+  geom_col(position="dodge")
 
 # Transforma el campo categoría a factor ordenado, y lo ordena segun sus levels
 # El orden de los levels lo fijas al crear el factor (contraintuitivo, con rev)
@@ -402,59 +428,58 @@ XXX <- FLAG %>% filter(Recibos) %>%
                 group_by(Fecha_Final, Categoria_ORD, Categoria) %>% # No es necesario group_by Categoria,
                 summarise(Suma=sum(Importe))                        # Lo he dejado para poder después
                                                                     # comparar los dos órdenes
-ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
-  geom_col()                                                                    
-
-ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
-  geom_col()
-
-
-
-XXX <- FLAG %>% filter(Total_Gasto) %>% 
-                mutate(Categoria_ORD = factor(Categoria, levels= rev(c("Recibo_Cte", "Recibo_Otr","Casa","Gasto_Cte", "Gasto_Otr"))))%>% 
-                group_by(Fecha_Final, Categoria_ORD) %>% 
-                summarise(Suma=sum(Importe))                       
-ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
-  geom_col()                                                                    
-
-
-(Cat_levels=sort(unique(XXX$Categoria_ORD)))
-(Cat_levels=sort(unique(XXX$Categoria)))
-
-
+#(Cat_levels=sort(unique(XXX$Categoria_ORD)))
 ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
   geom_col()
 
 ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
   geom_col(position="dodge")
 
+#(Cat_levels=sort(unique(XXX$Categoria)))
 ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
   geom_col()
 
-ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
+
+# Total_Gasto Ordenado
+
+
+XXX <- FLAG %>% filter(Total_Gasto) %>% 
+                mutate(Categoria_ORD = factor(Categoria, levels= rev(c("Recibo_Cte", "Recibo_Otr","Casa","Gasto_Cte", "Gasto_Otr"))))%>% 
+                group_by(Fecha_Final, Categoria_ORD, Categoria) %>% 
+                summarise(Suma=sum(Importe))                       
+ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
+  geom_col()                                                                    
+
+ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
   geom_col(position="dodge")
 
 #=====================
 
 # Superpones lineas, o puntos, de cualquier otra columna de REPORT
-ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
+ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
   geom_col()+
   geom_point(aes(x=Fecha_Final, y=-Total_Gasto),
              data=REPORT,
-             inherit.aes = FALSE)+  
-  geom_segment(aes(x = Fecha_Final, y = 0, xend = Fecha_Final, yend = -Total_Gasto),
-               data = REPORT,
-               inherit.aes = FALSE)
+             inherit.aes = FALSE, colour="NAVYBLUE")+  
+#  geom_segment(aes(x = Fecha_Final, y = 0, xend = Fecha_Final, yend = -Total_Gasto),
+#               data = REPORT,
+#               inherit.aes = FALSE)+
+  geom_line(aes(x=Fecha_Final, y=-Total_Gasto_MM3),
+            data=REPORT,
+            inherit.aes = FALSE, colour="NAVYBLUE",linetype = "dotdash")+
+  geom_line(aes(x=Fecha_Final, y=-mean(Total_Gasto)),
+            data=REPORT,
+            inherit.aes = FALSE, colour="NAVYBLUE",linetype = "dotted")
 
 
-ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
-  geom_col(position="dodge")+
-  geom_point(aes(x=Fecha_Final, y=Nomina),
-             data=REPORT,
-             inherit.aes = FALSE)+  
-  geom_segment(aes(x = Fecha_Final, y = 0, xend = Fecha_Final, yend = Nomina),
-               data = REPORT,
-               inherit.aes = FALSE)
+ggplot(XXX, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
+  geom_col(position="dodge") #+
+#  geom_point(aes(x=Fecha_Final, y=Nomina),
+#             data=REPORT,
+#             inherit.aes = FALSE)+  
+#  geom_segment(aes(x = Fecha_Final, y = 0, xend = Fecha_Final, yend = Nomina),
+#               data = REPORT,
+#               inherit.aes = FALSE)
 
 
 #===============================================================================
@@ -476,14 +501,7 @@ ggplot()+
 #               inherit.aes = FALSE)#esta linea sobra porque no hereda nada
 #                                   #de la linea inicial de ggplot
 
-ggplot()+
-  geom_col(aes(x=Fecha_Final, y=-Suma, fill=Categoria), data=GROUPED_FLAG)+
-  #  geom_point(aes(x=Fecha_Final, y=-G_Cte_MM3), data=REPORT)+
-  #  geom_line(aes(x=Fecha_Final, y=-G_Cte_MM3), data=REPORT, colour="YELLOW")+
-  geom_segment(aes(x = Fecha_Final, y = 0, xend = Fecha_Final, yend = -G_Cte_MM3),
-               data = REPORT,
-               inherit.aes = FALSE)#esta linea sobra porque no hereda nada
-                                   #de la linea inicial de ggplot
+
 
 #================================================================================
 
