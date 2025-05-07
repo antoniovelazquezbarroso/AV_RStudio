@@ -10,11 +10,12 @@ Entrada <- read_excel("data/ING_01Oct2021_31Mar2025.xlsx", skip = 4)
    #> names(Entrada)
    #[1] "F. VALOR"     "CATEGORÍA"    "SUBCATEGORÍA" "DESCRIPCIÓN"  "COMENTARIO"   "IMPORTE (€)"
 
-
 # EN UN PASO
-# Elimina columnas innecesarias, cambia nombres de columnas incómodos
-# Convierte a tipo Date la columna Fecha, incluye NumOrden movimientos del banco,
-# añade la Descripcion del Codigo y ordena por Fecha y NumOrden
+# Elimina columnas innecesarias,
+# Cambia nombres de columnas incómodos,
+# Convierte a tipo Date la columna Fecha, Calcula e Incluye NumOrden
+# Ordena por Fecha y NumOrden,
+# Calcula Saldo para cada movimiento, acumulando desde el inicial
 ING <- Entrada %>%
   select(-COMENTARIO) %>%
   rename( Fecha = `F. VALOR`,
@@ -38,4 +39,3 @@ ING <- Entrada %>%
     #[1] "Fecha"        "NumOrden"     "Importe"      "Saldo"        "Descripcion"  "Categoria"    "Subcategoria"
 
 rm(Entrada)
-
