@@ -64,7 +64,7 @@ NEWMITIBBLE2 <- pivot_longer(MITIBBLE,everything(), names_to="Concepto") %>%
 View(NEWMITIBBLE2)
 
 # longer then wider by Concepto
-NEWMITIBBLE3 <- pivot_longer(MITIBBLE,everything(), names_to="Concepto")) %>% 
+NEWMITIBBLE3 <- pivot_longer(MITIBBLE,everything(), names_to="Concepto") %>% 
   pivot_wider(names_from=c(Concepto))
 View(NEWMITIBBLE3)
 

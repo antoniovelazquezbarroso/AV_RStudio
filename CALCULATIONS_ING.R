@@ -7,7 +7,7 @@ source("MyFunctions.R")
 #===============================================================================
 #  CUADRO DE ESTADÍSTICAS SOBRE COLUMNAS DE TOTALES SELECCIONADAS DE REPORT
 
-MISCOLS <- REPORT %>% select(Casa:Recibos)
+MISCOLS <- REPORT %>% select(Recibo_Cte:Total_Fijo)
 
 MISCOLS %>% pivot_longer(everything()) %>% 
             group_by(name) %>% 
@@ -45,7 +45,7 @@ ADHOC <- REPORT %>% mutate(LAG=lag(Gasto_Cte),
                            MiMM4=MM4(Gasto_Cte),
                            MiMM12=MMnum(Gasto_Cte, 12)
 ) %>% 
-  select(Fecha_Final, Gasto_Cte, LAG, MEAN, MiMM3, MiMM12, Total_Gasto) %>% 
+  select(Fecha_Final, Gasto_Cte, MEAN, MiMM3, MiMM12, Total_Gasto) %>% 
   filter(Fecha_Final>"2022-12-31")%>%
   arrange(rev(Fecha_Final)) %>% 
   print(n=nrow(REPORT)) 
@@ -67,7 +67,7 @@ ADHOC <- REPORT %>% mutate(LAG=lag(Total_Gasto),
                            MiMM4=MM4(Total_Gasto),
                            MiMM12=MMnum(Total_Gasto, 12)
                           ) %>% 
-         select(Fecha_Final, Total_Gasto, LAG, MEAN, MiMM3, MiMM4, MiMM12) %>% 
+         select(Fecha_Final, Total_Gasto, MEAN, MiMM3, MiMM4, MiMM12) %>% 
          filter(Fecha_Final>"2022-12-31") %>%
          arrange(rev(Fecha_Final)) %>% 
          print(n=nrow(REPORT))
@@ -83,9 +83,11 @@ ggplot(ADHOC, aes(Fecha_Final, -Total_Gasto)) +
 
 REPORT <- REPORT %>% mutate(G_Cte_MM3=MM3(Gasto_Cte))
 
-REPORT <- REPORT %>% mutate(G_Cte_MM3=MM3(Gasto_Cte),
-                            Total_Gasto_MM3=MM3(Total_Gasto)
-)
+REPORT <- REPORT %>% mutate(MM3_G_Cte=MM3(Gasto_Cte),
+                            MM3_Total_Gasto=MM3(Total_Gasto),
+                            MM12_G_Cte=MMnum(Gasto_Cte, 12),
+                            MM12_Total_Gasto=MMnum(Total_Gasto, 12)
+                            )
 
 #===============================================================================
 

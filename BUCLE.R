@@ -1,7 +1,7 @@
 source("REPORT_ING.R")
 source("MyFunctions.R")
 
-MISCOLS <- REPORT %>% select(Casa:Recibos)
+MISCOLS <- REPORT %>% select(Recibo_Cte:Total_Fijo)
 
 names(MISCOLS)
 dim(MISCOLS)
@@ -11,7 +11,7 @@ nrow(MISCOLS)
 str(MISCOLS)
 summary(MISCOLS)
 
-MISCOLS                 # tibble 42 x 9 (nrow x ncol)
+MISCOLS                 # tibble 42 x 10 (nrow x ncol)
 MISCOLS[1]              # tibble 42 x 1 
 MISCOLS[1:3]            # tibble 42 x 3
 MISCOLS[1,3]            # tibble 1 x 1
@@ -33,15 +33,15 @@ MyStats( (MISCOLS[[1]]) )
 
 
 MISCOLS %>% summarize(
-                      across(Casa:Recibos, mean)
+                      across(Recibo_Cte:Total_Fijo, mean)
                      )
 
 MISCOLS %>% summarize(
-                      across(Casa:Recibos, summary)
+                      across(Recibo_Cte:Total_Fijo, summary)
                      )
 
 MISCOLS %>% summarize(
-                      across(Casa:Recibos, MyStats)
+                      across(Recibo_Cte:Total_Fijo, MyStats)
                      )
 
 MISCOLS %>% pivot_longer(everything()) %>% #
@@ -60,3 +60,4 @@ MISCOLS %>% pivot_longer(everything()) %>% #
                       max=max(-value)
                      )
 
+MISCOLS %>% pivot_longer(everything()) 

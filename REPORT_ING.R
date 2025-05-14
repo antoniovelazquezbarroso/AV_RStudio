@@ -4,6 +4,31 @@ source("FLAG_ING.R")
 # source("CHECK_ING.R") # ¿AÑADIRLE UN MENSAJE PARA CASO DE ERRORES?
 
 #===============================================================================
+
+#    AÑADE AL MOVIMIENTO CATEGORIAS AGREGADAS ( O DESAGREGADAS ) 
+#    ESPECÍFICAS PARA INFORMES Y GRÁFICOS
+
+FLAG <- FLAG %>% mutate(
+          Total_Gasto = Casa | Recibo_Cte | Gasto_Cte | Recibo_Otr | Gasto_Otr,
+          Total_sin_Casa = Recibo_Cte |Gasto_Cte | Recibo_Otr | Gasto_Otr,  
+          Recibos = Recibo_Cte | Recibo_Otr,
+          Gastos = Gasto_Cte | Gasto_Otr,
+          Total_Fijo = Recibo_Cte | Gasto_Cte | Recibo_Otr 
+                        )
+
+#    Comunidad = (Categoria == "Recibos")&
+#                (grepl("CARGO DE RECIBOS", Descripcion)&
+#                 (grepl("Recibo Cp Rfv", Concepto)|
+#                  grepl("Recibo Raimundo Fernandez Villaverde", Concepto)|
+#                  grepl("Recibo Geminis I, Garaje", Concepto)
+#                  )
+#                 )
+#    Telefono = (Categoria == "Recibos")&
+#               (grepl("CARGO DE RECIBOS", Descripcion)&
+#                grepl("Recibo Yoigo", Concepto)
+#               )
+#===============================================================================
+
 #     AÑADE AL MOVIMIENTO Fecha_Final DE PERIODO 
 #     Para agrupar los datos en graficos o cuadros-resumen.
 
@@ -13,36 +38,14 @@ source("FLAG_ING.R")
 
 #  por meses
 FLAG <- FLAG %>%
-        mutate(Fecha_Final=as_date(ceiling_date(Fecha, unit = "month")-1))  
+  mutate(Fecha_Final=as_date(ceiling_date(Fecha, unit = "month")-1))  
 
 #  cambiando month por quarter para trimestres  
 #FLAG <- FLAG %>%
 #        mutate(Fecha_Final=as_date(ceiling_date(Fecha, unit = "quarter")-1))  
 
-#===============================================================================
-#    AÑADIR AL MOVIMIENTO CATEGORIAS AGREGADAS ( O DESAGREGADAS ) 
-#    ESPECÍFICAS PARA INFORMES Y GRÁFICOS
-
-FLAG <- FLAG %>% mutate(
-          Recibos = Recibo_Cte | Recibo_Otr,
-          Gastos = Gasto_Cte | Gasto_Otr,
-          Total_Fijo = Recibo_Cte | Gasto_Cte | Recibo_Otr, 
-          Total_sin_Casa = Recibo_Cte |Gasto_Cte | Recibo_Otr | Gasto_Otr,
-          Total_Gasto = Casa | Recibo_Cte | Gasto_Cte | Recibo_Otr | Gasto_Otr
-                        )
-        
-#    Recibos = Comunidad | Telefono | Luz ,
-#    Comunidad = (Categoria == "Recibos")&
-#                (grepl("CARGO DE RECIBOS", Descripcion)&
-#                 (grepl("Recibo Cp Rfv", Concepto)|
-#                  grepl("Recibo Raimundo Fernandez Villaverde", Concepto)|
-#                  grepl("Recibo Geminis I, Garaje", Concepto),
-#    Telefono=(Categoria == "Recibos")&
-#             (grepl("CARGO DE RECIBOS", Descripcion)&
-#             grepl("Recibo Yoigo", Concepto)
-#             )
-  
 #==============================================================================
+
 #     TOTALIZANDO IMPORTES POR FECHA_FINAL 
 #     Y POR CATEGORIA DESDE VARIABLES FILTRO,
 #     O CALCULANDO NUEVOS VALORES (p.e. TOTALES O SUBTOTALES DESDE MOVIMIENTOS)
@@ -64,18 +67,18 @@ REPORT <- FLAG %>%
             Gasto_Cte=sum(Importe[Gasto_Cte]),
             Gasto_Otr=sum(Importe[Gasto_Otr]),            
             Casa=sum(Importe[Casa]),
-            Total_Fijo=sum(Importe[Total_Fijo]),
+            Total_Gasto=sum(Importe[Total_Gasto]),            
+            #Otro_Total_Gasto=Casa+Recibo_Cte+Gasto_Cte+Recibo_Otr+Gasto_Otr,            
             Total_sin_Casa=sum(Importe[Total_sin_Casa]),
             #Otro_Total_sin_Casa=Recibo_Cte+Gasto_Cte+Recibo_Otr+Gasto_Otr,
-            Total_Gasto=sum(Importe[Total_Gasto]),            
-            #Otro_Total_Gasto=Casa+Recibo_Cte+Gasto_Cte+Recibo_Otr+Gasto_Otr,
-            Gastos=sum(Importe[Gastos]),
-            Recibos=sum(Importe[Recibos]),
+            Recibos=sum(Importe[Recibos]),            
+            Gastos=sum(Importe[Gastos]),            
+            Total_Fijo=sum(Importe[Total_Fijo]),
             #Patrimonio=sum(Importe[Patrimonio]),                 
             # Promedia y analiza variacion entre movimientos dentro del periodo
             #avGasto_Cte=mean(Importe[Gasto_Cte]), 
             #sdGasto_Cte=sd(Importe[Gasto_Cte]),
-            #Check=sum(Importe[Check]),
+            Check=sum(Importe[Check]),
             #OtroCheck= near( Suma,
             #                 (Nomina + 
             #                    Casa +
@@ -89,8 +92,10 @@ REPORT <- FLAG %>%
   ) 
 
 #  ) #  %>% 
+               # Puedes elegir los campos de salida, su orden, sus nombres ...
+
 #  select(Fecha_Final, Casa, Recibo_Cte, Recibo_Otr, ... , Patrimonio)
-#  select(Fecha_Final, Casa:Recibos)
+#  select(Fecha_Final, Recibo_Cte:Total_Fijo)
 
 #===============================================================================                                                              
 #                       TRASPONER ESTE DATA FRAME
