@@ -10,9 +10,11 @@ Total <- BS %>% summarize(
                             n_cobros = sum(Importe>0),
                             tot_cobros = sum(Importe[Importe>0]),
                             cobro_medio = mean(Importe[Importe>0]),
+                            cobro_medio_mensual= tot_cobros / n_meses ,
                             n_pagos = sum(Importe<0),
                             tot_pagos = sum(Importe[Importe<0]),
                             pago_medio = mean(Importe[Importe<0]),
+                            pago_medio_mensual= tot_pagos / n_meses ,
                             varsaldo = tot_cobros + tot_pagos                            
                             )
 Total
@@ -54,7 +56,6 @@ mean(Mensual$tot_pagos)
 sd(Mensual$tot_pagos)
 
 
-
 ggplot(Mensual) + # GRÁFICO  POR MESES CON INGRESOS, GASTOS Y VARSALDO (Y SUS PROMEDIOS)
   geom_line(aes(fin_de_mes, tot_cobros), colour="BLUE") +
   geom_line(aes(fin_de_mes, mean(tot_cobros)), colour="BLUE",linetype = "dotted") +
@@ -62,7 +63,6 @@ ggplot(Mensual) + # GRÁFICO  POR MESES CON INGRESOS, GASTOS Y VARSALDO (Y SUS P
   geom_line(aes(fin_de_mes, mean(abs(tot_pagos))), colour="RED",linetype = "dotdash") +
   geom_line(aes(fin_de_mes, mean(varsaldo)), colour="GREEN") +
   geom_line(aes(fin_de_mes, mean(varsaldo)), colour="GREEN",linetype = "dotted")
-
 
 ggplot(BS, aes(Importe)) +         # Histograma de movimientos por Importe
   geom_histogram(bins = 500)
@@ -81,10 +81,6 @@ ggplot(Cobros, aes(Importe)) +         # Histograma de Ingresos por Importe
 Cobros <- BS %>% filter(Importe>163)
 ggplot(Cobros, aes(Importe)) +         # Quitando Otros_Ingresos 
   geom_histogram(bins = 500)           # Son devoluciones de compras (su max es 162)
-
-
-
-
 
 Cobros %>% arrange(desc(Importe)) %>% print(n=20) # Los 20 mayores
 count(Cobros)

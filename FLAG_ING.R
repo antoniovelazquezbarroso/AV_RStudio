@@ -282,28 +282,5 @@ grepl("Transferencia emitida a Eva", Descripcion)               ~ "Casa",
 # (CHECK$tot == 0)
 # remove(CHECK)
 # 
-#    # Todas las Categorías, por su orden default
-# Cat=sort(unique(FLAG$Categoria))
-# Cat
-# # [1] "Casa"       "Gasto_Cte"  "Gasto_Otr"  "Nomina"     "Patrimonio" "Recibo_Cte" "Recibo_Otr"
-# #     "Recibo_Cte" "Recibo_Otr"
-# remove(Cat)
-#
-# #       CHECK NO HAY MOVIMIENTOS CON MÁS DE UNA CATEGORIA ASIGNADA
-# #       La suma de importes de todos los movimientos es igual a
-# #       la suma de los totales de todas las categorías
-# (
-# CHECK <- near(sum(FLAG$Importe), 
-#               (sum(FLAG$Importe[FLAG$Categoria == "Nomina"])+
-#                sum(FLAG$Importe[FLAG$Categoria == "Casa"])+
-#                sum(FLAG$Importe[FLAG$Categoria == "Recibo_Cte"])+
-#                sum(FLAG$Importe[FLAG$Categoria == "Recibo_Otr"])+
-#                sum(FLAG$Importe[FLAG$Categoria == "Gasto_Cte"])+
-#                sum(FLAG$Importe[FLAG$Categoria == "Gasto_Otr"])+
-#                sum(FLAG$Importe[FLAG$Categoria == "Patrimonio"])
-#               )
-#              )
-# )
-# remove(CHECK)
 # 
 # ========  HASTA AQUÍ PARA CLASIFICAR Y ETIQUETAR POR CATEGORÍAS ==============

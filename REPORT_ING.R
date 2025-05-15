@@ -1,4 +1,3 @@
-#library(writexl)
 #source("LOAD_ING.R")
 source("FLAG_ING.R")
 # source("CHECK_ING.R") # ¿AÑADIRLE UN MENSAJE PARA CASO DE ERRORES?
@@ -104,6 +103,7 @@ REPORT <- FLAG %>%
 #     pivot_wider(names_from=c(Fecha_Final))
 #   
 #   # PARA EXPORTAR A EXCEL
+#   library(writexl)
 #   write_xlsx(TO_EXCEL, 'data/TO_EXCEL.xlsx')
 #   
 #===============================================================================

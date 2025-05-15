@@ -1,5 +1,5 @@
-source("ProcesaBS.R")
-#source("ProcesaING.R")                      # Alternativamente
+source("LOAD_BS.R")
+#source("LOAD_ING.R")                      # Alternativamente
 
 
 # CÁLCULO DE SALDO MEDIO MENSUAL, TRIMESTRAL, ...

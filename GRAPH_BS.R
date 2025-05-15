@@ -1,84 +1,99 @@
-#   source("LOAD_ING.R")
-#   source("FLAG_ING.R")
-#   # source("CHECK_ING.R") # ¿AÑADIRLE UN MENSAJE PARA CASO DE ERRORES?
-source("REPORT_ING.R")
+# source("LOAD_BS.R")
+# source("FLAG_BS.R")
+# source("CHECK_BS.R") # ¿AÑADIRLE UN MENSAJE PARA CASO DE ERRORES?
+#   No existe CHECK_BS.R, habrá que crearlo si conviene
+
+source("REPORT_BS.R")
 source("MyFunctions.R")
-#=================================================================================                                                              
+#===============================================================================                                                              
 #    GRAFICOS SOBRE REPORT
 
 ggplot(REPORT) +                # GRÁFICO LINEAS POR MESES CON INGRESOS, GASTOS 
+  #geom_line(aes(Fecha_Final, abs(Transferencias)), colour="DARKGREY", linetype = "dotted") +
   geom_line(aes(Fecha_Final, abs(Total_Gasto)), colour="BLACK") +
-  geom_line(aes(Fecha_Final, abs(Casa)), colour="GREEN") +
-  geom_line(aes(Fecha_Final, abs(Gasto_Cte)), colour="BLUE") +
-  geom_line(aes(Fecha_Final, abs(Recibos)), colour="DARKGREY") +
-  geom_line(aes(Fecha_Final, abs(Gasto_Otr)), colour="RED")  #
-#  geom_line(aes(Fecha_Final, (abs(Casa)+
-#                              abs(Recibo_Cte)+
-#                              abs(Recibo_Otr)+
-#                              abs(Gasto_Cte)+
-#                              abs(Gasto_Otr)
-#                             )
-#               ), colour="DARKGREY"
-#            )
+  geom_line(aes(Fecha_Final, abs(Total_Fijo)), colour="BLACK",linetype = "dotdash") +
+  geom_line(aes(Fecha_Final, abs(Recibos)), colour="YELLOW") +
+  geom_line(aes(Fecha_Final, abs(Servicio)), colour="GREEN") +
+  geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="BLUE") +
+  geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="RED") 
 
 ggplot(REPORT) +              # GRÁFICO LINEAS POR MESES CON GASTOS Y SUS MEDIAS
   geom_line(aes(Fecha_Final, abs(Total_Gasto)), colour="DARKGREY") +
-  geom_line(aes(Fecha_Final, abs(Total_sin_Casa)), colour="BLACK") +
-  geom_line(aes(Fecha_Final, abs(Recibos)), colour="GREEN") +
-  geom_line(aes(Fecha_Final, abs(Gasto_Cte)), colour="BLUE") +
-  geom_line(aes(Fecha_Final, abs(Gasto_Otr)), colour="RED") +
+  geom_line(aes(Fecha_Final, abs(Total_Fijo)), colour="BLACK") +
+  geom_line(aes(Fecha_Final, abs(Recibos)), colour="YELLOW") +
+  geom_line(aes(Fecha_Final, abs(Servicio)), colour="GREEN") +  
+  geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="BLUE") +
+  geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="RED") +
   geom_line(aes(Fecha_Final, mean(abs(Total_Gasto))), colour="DARKGREY",linetype = "dotdash") +
-  geom_line(aes(Fecha_Final, mean(abs(Total_sin_Casa))), colour="BLACK",linetype = "dotdash") +
-  geom_line(aes(Fecha_Final, mean(abs(Recibos))), colour="GREEN",linetype = "dotdash") +
-  geom_line(aes(Fecha_Final, mean(abs(Gasto_Cte))), colour="BLUE",linetype = "dotdash") +  
-  geom_line(aes(Fecha_Final, mean(abs(Gasto_Otr))), colour="RED",linetype = "dotdash")
-#  Otro Total_Gasto
-#  geom_line(aes(Fecha_Final, (abs(Casa)+
-#                              abs(Recibo_Cte)+
-#                              abs(Recibo_Otr)+
-#                              abs(Gasto_Cte)+
-#                              abs(Gasto_Otr)
-#                             )
-#                ), colour="DARKGREY")
+  geom_line(aes(Fecha_Final, mean(abs(Total_Fijo))), colour="BLACK",linetype = "dotdash") +
+  geom_line(aes(Fecha_Final, mean(abs(Recibos))), colour="YELLOW",linetype = "dotdash") +
+  geom_line(aes(Fecha_Final, mean(abs(Servicio))), colour="GREEN",linetype = "dotdash") +
+  geom_line(aes(Fecha_Final, mean(abs(Gasto_Corriente))), colour="BLUE",linetype = "dotdash") +  
+  geom_line(aes(Fecha_Final, mean(abs(Gasto_Otro))), colour="RED",linetype = "dotdash")
 
+ggplot(REPORT) +                      # GRÁFICO LINEAS RECIBOS DESAGREGADO
+  #  geom_line(aes(Fecha_Final, abs(Transferencias)), colour="RED", linetype = "dotted") +
+  #  geom_line(aes(Fecha_Final, abs(Gastos)), colour="BLUE",linetype = "dotted") +
+  #  geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="GREEN") +
+  #  geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="ORANGE")+
+  #  geom_line(aes(Fecha_Final, abs(Servicio)), colour="DARKGREY")+
+  geom_line(aes(Fecha_Final, abs(Recibos)), colour="BLACK",linetype = "dotdash") +
+  geom_line(aes(Fecha_Final, abs(Comunidad)), colour="PINK") +
+  geom_line(aes(Fecha_Final, abs(Telefono)), colour="RED") +
+  geom_line(aes(Fecha_Final, abs(Luz)), colour="GREEN") 
 
-#  DESDE REPORT SOLO BARRAS PARA UNA COLUMNA,SUPERPONES OTRAS(CON LINEAS,PUNTOS)
+ggplot(REPORT) +            # GRÁFICO LINEAS RECIBOS DESAGREGADO, ANALISIS COMUNIDAD
+  #  geom_line(aes(Fecha_Final, abs(Transferencias)), colour="RED", linetype = "dotted") +
+  #  geom_line(aes(Fecha_Final, abs(Gastos)), colour="BLUE",linetype = "dotted") +
+  #  geom_line(aes(Fecha_Final, abs(Gasto_Corriente)), colour="GREEN") +
+  #  geom_line(aes(Fecha_Final, abs(Gasto_Otro)), colour="ORANGE")+
+  #  geom_line(aes(Fecha_Final, abs(Servicio)), colour="DARKGREY")+
+  geom_line(aes(Fecha_Final, abs(Recibos)), colour="BLACK",linetype = "dotdash") +
+  geom_line(aes(Fecha_Final, abs(Comunidad)), colour="LIGHTBLUE") +
+  #geom_line(aes(Fecha_Final, abs(Telefono)), colour="RED") +
+  #geom_line(aes(Fecha_Final, abs(Luz)), colour="YELLOW")+
+  geom_line(aes(Fecha_Final, abs(MM3(Comunidad))), colour="GREEN")+
+  geom_line(aes(Fecha_Final, abs(mean(Comunidad))), colour="DARKORANGE",linetype = "dotdash")
+
+#  DESDE REPORT SOLO BARRAS PARA UNA COLUMNA,
+#  PUEDES SUPERPONER OTRAS COLUMNAS ( p.e. con alpha ), PERO SIN APILARLAS
+#  PUEDES SUPERPONER TAMBIEN LINEAS O PUNTOS
+
 # Solo una columna
-ggplot(REPORT, aes(x=Fecha_Final, y= abs(Gasto_Cte))) +
-  geom_col(fill="GREY")
+ggplot(REPORT, aes(x=Fecha_Final, y= abs(Total_Gasto))) +
+  geom_col(fill="NAVYBLUE") 
 
 # Puedes superponer varias, pero no apilarlas
 ggplot(REPORT) +
   geom_col(aes(x=Fecha_Final, y= abs(Total_Gasto)), fill="GOLD") +
-  geom_col(aes(x=Fecha_Final, y= abs(Total_Fijo)), fill="BLUE", alpha=0.4)
+  geom_col(aes(x=Fecha_Final, y= abs(Total_Fijo)), fill="RED", alpha=0.2)
 
 # Superpones lineas, o puntos, de cualquier otra columna de REPORT
-ggplot(REPORT, aes(x=Fecha_Final, y= abs(Gasto_Cte))) +
+ggplot(REPORT, aes(x=Fecha_Final, y= abs(Total_Fijo))) +
   geom_col(fill="GREY") +
   geom_line(aes(x=Fecha_Final, y=abs(Total_Gasto)), colour="RED") +
-  geom_line(aes(x=Fecha_Final, y=mean(abs(Gasto_Cte))), colour="BLUE")+
-  geom_line(aes(x=Fecha_Final, y=mean(abs(Gasto_Cte))+sd(Gasto_Cte)), colour="BLUE",linetype = "dotdash")+
-  geom_line(aes(x=Fecha_Final, y=mean(abs(Gasto_Cte))-sd(Gasto_Cte)), colour="BLUE",linetype = "dotdash")
-            
+  geom_line(aes(x=Fecha_Final, y=mean(abs(Total_Fijo))), colour="BLUE")+
+  geom_line(aes(x=Fecha_Final, y=mean(abs(Total_Fijo))+sd(Total_Fijo)), colour="BLUE",linetype = "dotdash")+
+  geom_line(aes(x=Fecha_Final, y=mean(abs(Total_Fijo))-sd(Total_Fijo)), colour="BLUE",linetype = "dotdash")
 
 # Añades campos calculados sobre columnas de REPORT
 # para Superponer lineas, o puntos, desde cualquier otra columna de REPORT
 
 #   source("MyFunctions.R")
 ADHOC <- REPORT %>% mutate(#G_Cte_MM3=MM3(Gasto_Cte),
-                            Total_Gasto_MM3=MM3(Total_Gasto),
-                            Pct_Casa_Total=REPORT$Casa/REPORT$Total_Gasto*100
+                            MM3_Total_Gasto=MM3(Total_Gasto),
+                            #Pct_Fijo_Total=REPORT$Total_Fijo/REPORT$Total_Gasto*100
                            ) %>% 
                 #     filter(Fecha_Final>= "2023-12-31") %>% 
                     select(Fecha_Final,
                            Total_Gasto,
-                           #Pct_Casa_Total,
-                           Total_Gasto_MM3
+                           #Pct_Fijo_Total,
+                           MM3_Total_Gasto
                           )
 
 ggplot(ADHOC, aes(x=Fecha_Final, y= abs(Total_Gasto))) +
   geom_col(fill="GREY")+
-  geom_line(aes(y=abs(Total_Gasto_MM3)),color = "BLUE",linetype = "dotdash") +
+  geom_line(aes(y=abs(MM3_Total_Gasto)),color = "BLUE",linetype = "dotdash") +
   geom_line(aes(y=abs(mean(Total_Gasto))),color = "RED",linetype = "dotdash") 
 
 #===============================================================================
@@ -86,10 +101,11 @@ ggplot(ADHOC, aes(x=Fecha_Final, y= abs(Total_Gasto))) +
 #   LOS GRAFICOS DE BARRAS, DESAGREGADOS POR CATEGORIAS
 #   NECESITAN ARRANCAR DESDE LOS MOVIMIENTOS (FLAG), NO DESDE TOTALES (REPORT)
 
+# Total_Gasto Sin Ordenar
 # DESDE FLAG PUEDES DIBUJAR COLUMNAS CON TOTALES ABIERTOS POR CATEGORÍAS
 GROUPED_FLAGS <- FLAG %>% filter(Total_Gasto) %>% 
                           group_by(Fecha_Final, Categoria) %>% 
-                          summarise(Suma=sum(Importe))
+                          summarise(Suma=sum(Importe), .groups = "drop")
 
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
   geom_col()
@@ -99,39 +115,54 @@ ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
 
 # PUEDES ORDENAR LAS BARRAS COMO QUIERAS 
 
-# Recibos Ordenado
+# Recibos sin Ordenar
 # Por default el campo categoría es texto, y lo ordena alfabéticamente
 GROUPED_FLAGS <- FLAG %>% filter(Recibos) %>% 
   group_by(Fecha_Final, Categoria) %>% 
-  summarise(Suma=sum(Importe))
-
+  summarise(Suma=sum(Importe), .groups = "drop")
+                                            # ME SIRVE EN ESTE ORDEN
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
   geom_col()
 
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
   geom_col(position="dodge")
 
+# Recibos Ordenados
 # Transforma el campo categoría a factor ordenado, y lo ordena segun sus levels
 # El orden de los levels lo fijas al crear el factor (contraintuitivo, con rev)
 # Van de abajo arriba en barras stacked, de derecha a izquierda en barras dodged
 GROUPED_FLAGS <- FLAG %>% filter(Recibos) %>% 
-  mutate(Categoria_ORD = factor(Categoria, levels= rev(c("Recibo_Cte", "Recibo_Otr"))))%>% 
+  mutate(Categoria_ORD = factor(Categoria, levels= rev(c("Comunidad","Telefono", "Luz" )))) %>% 
   group_by(Fecha_Final, Categoria_ORD, Categoria) %>% # No es necesario group_by Categoria,
-  summarise(Suma=sum(Importe))                        # Lo he dejado para poder después
-# comparar los dos órdenes
-#(Cat_levels=sort(unique(XXX$Categoria_ORD)))
+  summarise(Suma=sum(Importe), .groups = "drop")      # Lo he dejado para poder después
+                                                      # comparar los dos órdenes
+#(Cat_levels=sort(unique(GROUPED_FLAGS$Categoria_ORD)))      # ORDENADOS
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
   geom_col()
-
+                                                             
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
   geom_col(position="dodge")
+                                                              # SIN ORDENAR
+#(Cat_levels=sort(unique(GROUPED_FLAGS$Categoria)))
+ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria)) +
+  geom_col()
 
 # Total_Gasto Ordenado
-
 GROUPED_FLAGS <- FLAG %>% filter(Total_Gasto) %>% 
-  mutate(Categoria_ORD = factor(Categoria, levels= rev(c("Recibo_Cte", "Recibo_Otr","Casa","Gasto_Cte", "Gasto_Otr"))))%>% 
-  group_by(Fecha_Final, Categoria_ORD, Categoria) %>% 
-  summarise(Suma=sum(Importe), .groups = "drop")                       
+                 mutate(Categoria_ORD = factor(Categoria,
+                                               levels= rev(c("Luz",
+                                                              "Telefono",
+                                                              "Comunidad",
+                                                              "Servicio",
+                                                              "Gasto_Corriente",
+                                                              "Gasto_Otro"
+                                                             )
+                                                           )
+                                               )
+                        )%>% 
+                 group_by(Fecha_Final, Categoria_ORD) %>% 
+                 summarise(Suma=sum(Importe), .groups = "drop")
+
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
   geom_col()                                                                    
 
@@ -158,7 +189,7 @@ ggplot(ADHOC, aes(Fecha_Final, -Total_Gasto)) +
 
 #=====================
 
-# Superpones  a las barras lineas, o puntos, de cualquier otra columna de REPORT
+# Superpones  a las barras lineas, o puntos; de cualquier otra columna de REPORT
 
 GROUPED_FLAGS <- GROUPED_FLAGS %>% filter(Fecha_Final>"2022-12-31") # Igual que ADHOC
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
@@ -181,21 +212,14 @@ ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
 
 
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
-  geom_col(position="dodge") #+
-#  geom_point(aes(x=Fecha_Final, y=Nomina),
-#             data=REPORT,
-#             inherit.aes = FALSE)+  
-#  geom_segment(aes(x = Fecha_Final, y = 0, xend = Fecha_Final, yend = Nomina),
-#               data = REPORT,
-#               inherit.aes = FALSE)
-
+  geom_col(position="dodge")
 
 #===============================================================================
 
 # DISTINTOS GEOMS CON DISTINTO ORIGEN DE DATOS
 
 ggplot()+
-  geom_col(aes(x=Fecha_Final, y=-Suma, fill=Categoria), data=GROUPED_FLAGS)+
+  geom_col(aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD), data=GROUPED_FLAGS)+
 #  geom_point(aes(x=Fecha_Final, y=-MiMM3), data=ADHOC)+
   geom_line(aes(x=Fecha_Final, y=-MiMM3), data=ADHOC, colour="BLUE",linetype = "dotdash")+
   geom_line(aes(x=Fecha_Final, y=-mean(Total_Gasto)), data=ADHOC, colour="YELLOW") #+
