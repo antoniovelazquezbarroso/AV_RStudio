@@ -65,8 +65,8 @@ ggplot(REPORT, aes(x=Fecha_Final, y= abs(Total_Gasto))) +
 
 # Puedes superponer varias, pero no apilarlas
 ggplot(REPORT) +
-  geom_col(aes(x=Fecha_Final, y= abs(Total_Gasto)), fill="GOLD") +
-  geom_col(aes(x=Fecha_Final, y= abs(Total_Fijo)), fill="RED", alpha=0.2)
+  geom_col(aes(x=Fecha_Final, y= abs(Total_Gasto)), fill="LIGHTGREY") +
+  geom_col(aes(x=Fecha_Final, y= abs(Total_Fijo)), fill="RED", alpha=0.8)
 
 # Superpones lineas, o puntos, de cualquier otra columna de REPORT
 ggplot(REPORT, aes(x=Fecha_Final, y= abs(Total_Fijo))) +
@@ -213,6 +213,73 @@ ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
 
 ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
   geom_col(position="dodge")
+
+
+# Total_Fijo en Barras Ordenado y con Medias
+#        DESDE FLAG PUEDES DIBUJAR COLUMNAS CON TOTALES ABIERTOS POR CATEGORÍAS
+GROUPED_FLAGS <- FLAG %>% filter(Total_Fijo) %>% 
+                 mutate(Categoria_ORD = factor(Categoria,
+                                               levels= rev(c("Luz",
+                                                             "Telefono",
+                                                             "Comunidad",
+                                                             "Servicio",
+                                                             "Gasto_Corriente"
+                                                             )
+                                                           )
+                                              )
+                       )%>%
+                 group_by(Fecha_Final, Categoria_ORD) %>%
+                 filter(Fecha_Final>"2022-12-31") %>%
+                 summarise(Suma=sum(Importe), .groups = "drop")
+#       ENRIQUECES REPORT CON LO QUE NECESITES GRAFICAR
+ADHOC <- REPORT %>% mutate(MEAN_TF=mean(REPORT$Total_Fijo),
+                           MiMM3_TF=MM3(Total_Fijo),
+                           # MiMM4_TF=MM4(Total_Fijo),
+                           MiMM12_TF=MMnum(Total_Fijo, 12),
+                           MEAN_TG=mean(REPORT$Total_Gasto),
+                           MiMM3_TG=MM3(Total_Gasto),
+                           # MiMM4_TG=MM4(Total_Gasto),
+                           MiMM12_TG=MMnum(Total_Gasto, 12),
+                          ) %>% 
+                    select(Fecha_Final,
+                           MEAN_TF,
+                           MiMM3_TF,
+                           # MiMM4_TF,
+                           MiMM12_TF,
+                           Total_Gasto,                           
+                           MEAN_TG,
+                           MiMM3_TG,
+                           # MiMM4_TG,
+                           MiMM12_TG                           
+                          ) %>% 
+                    filter(Fecha_Final>"2022-12-31") %>%
+                    arrange(rev(Fecha_Final))   %>% 
+                    print(n=nrow(REPORT))
+
+ggplot(GROUPED_FLAGS, aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD)) +
+  geom_col()
+
+ggplot()+
+  geom_col(aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD), data=GROUPED_FLAGS)+
+  geom_line(aes(x=Fecha_Final, y=-MEAN_TF), data=ADHOC, colour="BLACK")+
+  geom_line(aes(x=Fecha_Final, y=-MiMM3_TF), data=ADHOC, colour="BLACK",linetype = "dashed")+
+  geom_line(aes(x=Fecha_Final, y=-MiMM12_TF), data=ADHOC, colour="BLACK",linetype = "dotted")+
+  geom_line(aes(x=Fecha_Final, y=-Total_Gasto), data=ADHOC, colour="VIOLET")+  
+  geom_line(aes(x=Fecha_Final, y=-MEAN_TG), data=ADHOC, colour="VIOLET")+
+  geom_line(aes(x=Fecha_Final, y=-MiMM3_TG), data=ADHOC, colour="VIOLET",linetype = "dashed")+
+  geom_line(aes(x=Fecha_Final, y=-MiMM12_TG), data=ADHOC, colour="VIOLET",linetype = "dotted") #+
+
+ggplot(data=ADHOC, aes(x=Fecha_Final))+
+  geom_line(aes(y=-MEAN_TF),      colour="BLACK")+
+  geom_line(aes(y=-MiMM3_TF),     colour="BLACK",linetype = "dashed")+
+  geom_line(aes(y=-MiMM12_TF),    colour="BLACK",linetype = "dotted")+
+  geom_point(aes(y=-Total_Gasto), colour="VIOLET")+
+  geom_segment(aes(y= 0, xend = Fecha_Final, yend = -Total_Gasto), colour="VIOLET")+
+  geom_line(aes(y=-MEAN_TG),    colour="VIOLET")+
+  geom_line(aes(y=-MiMM3_TG),   colour="VIOLET",linetype = "dashed")+
+  geom_line(aes(y=-MiMM12_TG),  colour="VIOLET",linetype = "dotted") +
+  geom_col(aes(x=Fecha_Final, y=-Suma, fill=Categoria_ORD, alpha=0.9), data=GROUPED_FLAGS)
+
 
 #===============================================================================
 
