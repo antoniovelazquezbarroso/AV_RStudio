@@ -36,12 +36,12 @@ FLAG <- FLAG %>% mutate(
 # acumulados por Categorías, que se hacen desde FLAG (movimientos individuales)
 
 #  por meses
-FLAG <- FLAG %>%
-  mutate(Fecha_Final=as_date(ceiling_date(Fecha, unit = "month")-1))  
+#FLAG <- FLAG %>%
+#  mutate(Fecha_Final=as_date(ceiling_date(Fecha, unit = "month")-1))  
 
 #  cambiando month por quarter para trimestres  
-#FLAG <- FLAG %>%
-#        mutate(Fecha_Final=as_date(ceiling_date(Fecha, unit = "quarter")-1))  
+FLAG <- FLAG %>%
+        mutate(Fecha_Final=as_date(ceiling_date(Fecha, unit = "quarter")-1))  
 
 #==============================================================================
 
