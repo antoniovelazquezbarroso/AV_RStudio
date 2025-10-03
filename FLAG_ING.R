@@ -104,8 +104,8 @@ Patrimonio = (grepl("Pago", Descripcion)&                       #  Pagos > 2.000
               )&
               !abs(Importe) <= 1000
              )|
-             (grepl("Traspaso emitido Cuenta Nómina", Descripcion)|  # Traspasos
-              grepl("Traspaso recibido Cuenta Nómina", Descripcion)  
+             (grepl("Traspaso emitido", Descripcion)|  # Traspasos
+              grepl("Traspaso recibido", Descripcion)  
              )|
              (grepl("Transferencia emitida", Descripcion)&         # Suscrip_Bde
               grepl("Suscrip", Descripcion) 
@@ -259,8 +259,8 @@ grepl("Transferencia emitida a Eva", Descripcion)               ~ "Casa",
  )&
  !abs(Importe) <= 1000
 )|
-(grepl("Traspaso emitido Cuenta Nómina", Descripcion)|  # Traspasos
- grepl("Traspaso recibido Cuenta Nómina", Descripcion)  
+(grepl("Traspaso emitido", Descripcion)|  # Traspasos
+ grepl("Traspaso recibido", Descripcion)  
 )|
 (grepl("Transferencia emitida", Descripcion)&         # Suscrip_Bde
  grepl("Suscrip", Descripcion) 

@@ -41,7 +41,8 @@ FLAG <- FLAG %>%
                  )|
                  (grepl("PAGO EN EFECTIVO", Descripcion)&
                   grepl("Retirada De Efectivo En Cajero", Concepto)&
-                  !abs(Importe) > 500
+                  abs(Importe) < 500 &
+                  abs(Importe) >= 370  
                  ),         
          
          # Gasto_Corriente 
@@ -65,9 +66,8 @@ FLAG <- FLAG %>%
             grepl("ABONOS VARIOS CONCEPTOS", Descripcion)|
             grepl("ADEUDO INTER/COMIS/GASTOS", Descripcion)|
             (grepl("PAGO EN EFECTIVO", Descripcion)&
-               !(grepl("Retirada De Efectivo En Cajero", Concepto)&
-                   !abs(Importe) > 500
-               )
+     #        grepl("Retirada De Efectivo En Cajero", Concepto)&
+             abs(Importe) < 370
             )
            )
                           ),
@@ -87,9 +87,13 @@ FLAG <- FLAG %>%
            (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
                 grepl("Reint", Concepto)&
                 abs(Importe) > 500
-            )
-                    ),          
-         
+            )|
+           (grepl("PAGO EN EFECTIVO", Descripcion)&
+     #          grepl("Retirada De Efectivo En Cajero", Concepto)&
+               abs(Importe) >= 500
+           )
+ 
+                   ),
          # Transferencias
                       # Transferencias a casa (excluyendo menores de € 200)
                       # las menores van a Tarjeta_Cte (por compensación gastos)
@@ -181,7 +185,12 @@ mutate(Categoria = case_when( #Inicio de case_when
 (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
  grepl("Reint", Concepto)&
  !abs(Importe) > 500
-)                                                             ~ "Servicio",
+)|
+(grepl("PAGO EN EFECTIVO", Descripcion)&
+ grepl("Retirada De Efectivo En Cajero", Concepto)&
+ abs(Importe) < 500 &
+ abs(Importe) >= 370  
+)                                                           ~ "Servicio",
 
 # Gasto_Corriente             
 (
@@ -196,9 +205,12 @@ mutate(Categoria = case_when( #Inicio de case_when
     abs(Importe) <= 200
  )|                               
  (grepl("ABONO DE OPERACION CON TARJETA", Descripcion)|
-    grepl("ABONOS VARIOS CONCEPTOS", Descripcion)|
-    grepl("ADEUDO INTER/COMIS/GASTOS", Descripcion)|
-    grepl("PAGO EN EFECTIVO", Descripcion)                       
+  grepl("ABONOS VARIOS CONCEPTOS", Descripcion)|
+  grepl("ADEUDO INTER/COMIS/GASTOS", Descripcion)|
+  (grepl("PAGO EN EFECTIVO", Descripcion)&
+#   grepl("Retirada De Efectivo En Cajero", Concepto)&
+   abs(Importe) < 370  
+  )
  ) 
 )                                                          ~ "Gasto_Corriente",  
 
@@ -214,8 +226,15 @@ mutate(Categoria = case_when( #Inicio de case_when
  (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
     grepl("Reint", Concepto)&
     abs(Importe) > 500
- )
+ )|
+ (grepl("PAGO EN EFECTIVO", Descripcion)&
+#    grepl("Retirada De Efectivo En Cajero", Concepto)&
+    abs(Importe) >=500  
+ )   
 )                                                             ~ "Gasto_Otro", 
+
+
+
 
 # Transferencias   
 (grepl("TRANSFERENCIAS RECIBIDAS", Descripcion)&
