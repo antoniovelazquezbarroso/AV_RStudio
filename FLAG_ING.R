@@ -14,9 +14,10 @@ FLAG <- FLAG %>%
 
 Nomina = grepl("Nomina recibida", Descripcion),
 
-Casa = grepl("Transferencia emitida periódica", Descripcion)|
-       grepl("Transferencia emitida a EVA", Descripcion)|
-       grepl("Transferencia emitida a Eva", Descripcion),
+Casa = (grepl("Transferencia emitida periódica", Descripcion)|
+        grepl("Transferencia emitida a EVA", Descripcion)|
+        grepl("Transferencia emitida a Eva", Descripcion)) &
+        !grepl("De Antonio para Viaje Mosela", Descripcion),  # va a Gasto_Otr
 
 Recibo_Cte = (grepl("Recibo", Descripcion)&              # Recibos Pago Mensual
               !(grepl("AYUNTAMIENTO", Descripcion)|
@@ -75,7 +76,9 @@ Gasto_Otr = (grepl("Pago", Descripcion))&               # Pagos > 250 y <= 2.000
              !grepl("Transferencia emitida a Eva", Descripcion)&
              !grepl("Suscrip", Descripcion)&
              abs(Importe) > 200 & abs(Importe) <= 1000
-            ),
+            )|
+            grepl("De Antonio para Viaje Mosela", Descripcion), # va a Gasto_Otr
+
                                                                    # Patrimonio
 Patrimonio = (grepl("Pago", Descripcion)&                       #  Pagos > 2.000
               !abs(Importe) <= 2000)|
@@ -170,9 +173,11 @@ FLAG <- FLAG %>%
 grepl("Nomina recibida", Descripcion)                           ~ "Nomina",
 
 # Casa -------------------------------------------------------------------------
-grepl("Transferencia emitida periódica", Descripcion)|
-grepl("Transferencia emitida a EVA", Descripcion)|
-grepl("Transferencia emitida a Eva", Descripcion)               ~ "Casa",
+(grepl("Transferencia emitida periódica", Descripcion)|
+ grepl("Transferencia emitida a EVA", Descripcion)|
+ grepl("Transferencia emitida a Eva", Descripcion)) &
+!grepl("De Antonio para Viaje Mosela", Descripcion)             ~ "Casa",  
+# "Transferencia emitida a EVA"..." De Antonio para Viaje Mosela" va a Gasto_Otr
 
 # Recibos Pago Mensual ---------------------------------------------------------
 (grepl("Recibo", Descripcion)&               
@@ -229,7 +234,11 @@ grepl("Transferencia emitida a Eva", Descripcion)               ~ "Casa",
  !grepl("Transferencia emitida a EVA", Descripcion)&
  !grepl("Transferencia emitida a Eva", Descripcion)&
  !grepl("Suscrip", Descripcion)&
- abs(Importe) > 200 & abs(Importe) <= 1000)                     ~ "Gasto_Otr",                                                              
+ abs(Importe) > 200 & abs(Importe) <= 1000)|
+grepl("De Antonio para Viaje Mosela", Descripcion)              ~ "Gasto_Otr", 
+# "Transferencia emitida a EVA"..." De Antonio para Viaje Mosela" va a Gasto_Otr
+
+                                                               
                                                                 
 #  "Patrimonio" ----------------------------------------------------------------                                                                
 (grepl("Pago", Descripcion)&                       #  Pagos > 2.000
