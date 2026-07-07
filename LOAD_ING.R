@@ -4,8 +4,8 @@ library(tidyverse)
 #library(lubridate) # NO HAY QUE LLAMARLO APARTE, VA CON TIDYVERSE
 library(readxl)
 
-# Movimientos 01SEP2022-31DICIEMBRE2024 por fecha operación orden inverso
-Entrada <- read_excel("data/ING_01Oct2021_30Sep2025.xlsx", skip = 4) 
+# Movimientos 01OCT2021-31MARZO2026 por fecha operación orden inverso
+Entrada <- read_excel("data/ING_01Oct2021_31Mar2026.xlsx", skip = 3) 
 
    #> names(Entrada)
    #[1] "F. VALOR"     "CATEGORÍA"    "SUBCATEGORÍA" "DESCRIPCIÓN"  "COMENTARIO"   "IMPORTE (€)"

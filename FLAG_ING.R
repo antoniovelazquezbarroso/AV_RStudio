@@ -114,8 +114,10 @@ Patrimonio = (grepl("Pago", Descripcion)&                       #  Pagos > 2.000
               grepl("Suscrip", Descripcion) 
              )|
              (grepl("Transferencia recibida", Descripcion)&            # Int_Bde
-              grepl("Transferencia recibida de BANCO DE ESPA", Descripcion) 
-             ), 
+              grepl("Transferencia recibida de BANCO DE ESPA", Descripcion)
+             )|
+             (grepl("Transferencia internacional emitida", Descripcion)&
+              Importe == -448),       # Movimiento extraordinario 6 octubre 2025
 
 #       NO DEBE HABER MOVIMIENTOS SIN CLASIFICAR                      # Check
 Check=(
@@ -276,7 +278,9 @@ grepl("De Antonio para Viaje Mosela", Descripcion)              ~ "Gasto_Otr",
 )|
 (grepl("Transferencia recibida", Descripcion)&            # Int_Bde
  grepl("Transferencia recibida de BANCO DE ESPA", Descripcion) 
-)                                                               ~ "Patrimonio",                                                              
+)|
+(grepl("Transferencia internacional emitida", Descripcion)&  # Movimiento extraordinario 6 octubre 2025
+ Importe == -448)                                            ~ "Patrimonio",                                                              
 
 # NC, No debe haber movimientos sin clasificar ---------------------------------
 (TRUE)                                                          ~ "NC"                           

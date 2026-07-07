@@ -3,7 +3,7 @@ source("LOAD_BS.R")
 FLAG <- BS
 #===============================================================================
                                #  Eliminar columnas innecesarias por simplificar 
-FLAG <- FLAG %>% select(- NumOrden, -Saldo, -Codigo)
+FLAG <- FLAG %>% select(- NumOrden, - Saldo)  # Antes también quitaba -Codigo
 
 #===============================================================================
                          # Definir variables FILTRO por Categoría de Movimientos
@@ -11,95 +11,122 @@ FLAG <- FLAG %>%
   #Inicio de mutate
   mutate(
          # Recibos Comunidad Casa y Garaje
-         Comunidad=(grepl("CARGO DE RECIBOS", Descripcion)&
-                    (grepl("Recibo Cp Rfv", Concepto)|
-                     grepl("Recibo Raimundo Fernandez Villaverde", Concepto)|
-                     grepl("Recibo Geminis I, Garaje", Concepto)  
-                    )
+         Comunidad=(grepl("Recibo Cp Rfv", Concepto)|
+                    grepl("Recibo Raimundo Fernandez Villaverde", Concepto)|
+                    grepl("Recibo Geminis I, Garaje", Concepto)  
                    ),
          
          # Recibos Telefono
-         Telefono=(grepl("CARGO DE RECIBOS", Descripcion)&
-                   grepl("Recibo Yoigo", Concepto)
+         Telefono=(grepl("Recibo Yoigo", Concepto)|
+                   grepl("Recibo Grupo Masmovil" , Concepto)
                   ),
          
-         # Resto Recibos (LUZ) 
-         Luz=(grepl("CARGO DE RECIBOS", Descripcion)&
-              (!grepl("Recibo Cp Rfv", Concepto)&
-               !grepl("Recibo Raimundo Fernandez Villaverde", Concepto)&
-               !grepl("Recibo Geminis I, Garaje", Concepto)&
-               !grepl("Recibo Yoigo", Concepto)
-              )
+         # Recibos Luz
+         Luz=(grepl("Recibo Repsol", Concepto)|
+              grepl("Recibo Naturgy", Concepto)|
+              grepl("Recibo Gesternova", Concepto)|
+              grepl("Recibo Endesa", Concepto)
              ),            
 
          # Servicio 
                     # Reintegros Cajero hasta €500 para pagar Pilar
                     # Los mayores a €500 van a Gasto_Otro
-         Servicio=(grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
-                   grepl("Reint", Concepto)&
-                  !abs(Importe) > 500
-                 )|
-                 (grepl("PAGO EN EFECTIVO", Descripcion)&
-                  grepl("Retirada De Efectivo En Cajero", Concepto)&
-                  abs(Importe) < 500 &
-                  abs(Importe) >= 370  
-                 ),         
+         Servicio=(
+                   (grepl("Reint", Concepto)|
+                    grepl("Retirada De Efectivo En Cajero", Concepto)
+                   ) &  
+                   abs(Importe) <= 550 &
+                   abs(Importe) >= 200  
+                  ),         
          
          # Gasto_Corriente 
                     # Cargos Tarjeta excepto Cajeros y hasta €200      
                     # Transferecias emitidas hasta €200
                     # Transferencias recibidas hasta €200 (compensacion gastos)
                     # Conceptos Atípicos (devoluciones,compensacion gastos)
+                    # Cajeros hasta €200 (no es Servicio)         
             
          Gasto_Corriente=(
-           (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
-            !grepl("Reint", Concepto)&
+           
+                    # Cargos Tarjeta excepto Cajeros y hasta €200 
+           (
+            (grepl("Compra", Concepto)|
+             grepl("Pago", Concepto)|
+             grepl("Transaccion", Concepto)|
+             grepl("Liquidacion", Concepto)  # 2 Raros
+            ) &
             abs(Importe) <= 200
            )|
-           (grepl("TRANSFERENCIAS EMITIDAS", Descripcion)&
-              abs(Importe) <= 200
+                   # Transferencias emitidas hasta €200
+           (                      
+             (grepl("Transferencia A", Concepto)|
+              grepl("Traspaso", Concepto)|
+              grepl("Bizum", Concepto)
+             ) &
+             abs(Importe) <= 200
            )|
-           (grepl("TRANSFERENCIAS RECIBIDAS", Descripcion)&
-              abs(Importe) <= 200
-           )|                               
-           (grepl("ABONO DE OPERACION CON TARJETA", Descripcion)|
-            grepl("ABONOS VARIOS CONCEPTOS", Descripcion)|
-            grepl("ADEUDO INTER/COMIS/GASTOS", Descripcion)|
-            (grepl("PAGO EN EFECTIVO", Descripcion)&
-     #        grepl("Retirada De Efectivo En Cajero", Concepto)&
-             abs(Importe) < 370
-            )
+                   # Transferencias recibidas hasta €200 (es compensacion gasto)             
+           (grepl("Transferencia De", Concepto) &
+            abs(Importe) <= 200
+           )|
+                   # Conceptos Atípicos (devoluciones,compensacion gasto)             
+           (        
+            (grepl("Devolucion", Concepto)|
+             grepl("Anulacion", Concepto)
+            ) &
+            abs(Importe) <= 200  # Nunca los hubo mayores
+           )|
+                   # Cajeros hasta €200 (no es Servicio)             
+           (       
+            (grepl("Reint", Concepto)|
+             grepl("Retirada De Efectivo En Cajero", Concepto)
+            ) & 
+            abs(Importe) < 200 
            )
-                          ),
-         
+                        ),
+
          # Gasto_Otro         
            # Cargos Tarjeta excepto Cajeros y mayores de €200       
            # Transferencias Emitidas mayores de €200 (menores van a Tarjeta_Cte)
-           # Retiradas Cajero mayores de €500 (los menores van a Servicio)
+           # Cajeros mayores de €550 (los menores van a Servicio)
          Gasto_Otro=(
-           (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
-              !grepl("Reint", Concepto)&
-              !abs(Importe) <= 200
+           
+           # Cargos Tarjeta excepto Cajeros y mayores de €200 
+           (
+             (grepl("Compra", Concepto)|
+                grepl("Pago", Concepto)|
+                grepl("Transaccion", Concepto)
+             ) &
+               abs(Importe) > 200
            )|
-           (grepl("TRANSFERENCIAS EMITIDAS", Descripcion)&
-            !abs(Importe) <= 200
+               # Transferencias emitidas  mayores a €200 
+           (                     
+            (grepl("Transferencia A", Concepto)|
+             grepl("Traspaso", Concepto)|
+             grepl("Bizum", Concepto)
+            ) &
+            abs(Importe) > 200
            )|
-           (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
-                grepl("Reint", Concepto)&
-                abs(Importe) > 500
-            )|
-           (grepl("PAGO EN EFECTIVO", Descripcion)&
-     #          grepl("Retirada De Efectivo En Cajero", Concepto)&
-               abs(Importe) >= 500
+              # Cajeros mayor que €550 (no es Servicio)     
+           (                         
+            (grepl("Reint", Concepto)| 
+             grepl("Retirada De Efectivo En Cajero", Concepto)
+            ) &  
+            abs(Importe) > 550 
            )
  
                    ),
          # Transferencias
                       # Transferencias a casa (excluyendo menores de € 200)
-                      # las menores van a Tarjeta_Cte (por compensación gastos)
+                      # las menores van a Gasto_Cte (por compensación gastos)
                                                           
-         Transferencias=(grepl("TRANSFERENCIAS RECIBIDAS", Descripcion)&
-                         !abs(Importe) <= 200
+         Transferencias=(grepl("Transferencia De", Concepto)&
+                         !abs(Importe) <= 200 &
+                         !grepl("Pago Renta 2023", Concepto) # CASO RARO
+    # Eva, por error pago el 8nov2024 su IRPF desde Cta Casa (aparece como Compra Internet)
+    # Lo compensó con una transferencia a la casa. Esta se clasifica como Gasto_Otro porque
+    # en el concepto aparece "Pago" y es mayor de 220; así se compensa por el gasto).
+    # No debe, además contarse como Transferencia para Gastos Casa
                         ),                 
 
          #  COMPROBACIÓN NO HAY MOVIMIENTOS SIN CLASIFICAR       # Check
@@ -156,93 +183,133 @@ FLAG <- FLAG %>%
                     # Definir variable Categoría segun el FILTRO que aplica
 FLAG <- FLAG %>%
 #Inicio de mutate
-mutate(Categoria = case_when( #Inicio de case_when
+mutate(
+       Categoria = case_when( #Inicio de case_when
 
   
 # Comunidad
-(grepl("CARGO DE RECIBOS", Descripcion)&
-   (grepl("Recibo Cp Rfv", Concepto)|
-    grepl("Recibo Raimundo Fernandez Villaverde", Concepto)|
-    grepl("Recibo Geminis I, Garaje", Concepto)  
-   )
+(
+  grepl("Recibo Cp Rfv", Concepto)|
+  grepl("Recibo Raimundo Fernandez Villaverde", Concepto)|
+  grepl("Recibo Geminis I, Garaje", Concepto) 
 )                                                              ~ "Comunidad",
-  
+
 # Telefono
-(grepl("CARGO DE RECIBOS", Descripcion)&
-   grepl("Recibo Yoigo", Concepto)
+(
+  grepl("Recibo Yoigo", Concepto)|
+  grepl("Recibo MasMovil", Concepto) # Cuando venga
 )                                                             ~ "Telefono",
-  
+
 #Luz
-(grepl("CARGO DE RECIBOS", Descripcion)&
-   (!grepl("Recibo Cp Rfv", Concepto)&
-      !grepl("Recibo Raimundo Fernandez Villaverde", Concepto)&
-      !grepl("Recibo Geminis I, Garaje", Concepto)&
-      !grepl("Recibo Yoigo", Concepto)
-   )
+(
+  grepl("Recibo Repsol", Concepto)|
+  grepl("Recibo Naturgy", Concepto)|
+  grepl("Recibo Gesternova", Concepto)|
+  grepl("Recibo Endesa", Concepto)
 )                                                              ~ "Luz",        
 
 # Servicio
-(grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
- grepl("Reint", Concepto)&
- !abs(Importe) > 500
-)|
-(grepl("PAGO EN EFECTIVO", Descripcion)&
- grepl("Retirada De Efectivo En Cajero", Concepto)&
- abs(Importe) < 500 &
- abs(Importe) >= 370  
+(
+  (grepl("Reint", Concepto)|
+   grepl("Retirada De Efectivo En Cajero", Concepto)
+  ) &  
+  abs(Importe) <= 550 &
+  abs(Importe) >= 200
 )                                                           ~ "Servicio",
 
-# Gasto_Corriente             
+# Gasto_Corriente  
+
+# Cargos Tarjeta excepto Cajeros y hasta €200      
+# Transferecias emitidas hasta €200
+# Transferencias recibidas hasta €200 (compensacion gastos)
+# Conceptos Atípicos (devoluciones,compensacion gastos)
+# Cajeros hasta €200 (no es Servicio) 
 (
- (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
-    !grepl("Reint", Concepto)&
-    abs(Importe) <= 200
+  # Cargos Tarjeta excepto Cajeros y hasta €200 
+ (
+  (grepl("Compra", Concepto)|
+   grepl("Pago", Concepto)|
+   grepl("Transaccion", Concepto)|
+   grepl("Liquidacion", Concepto)  # 2 Raros
+  ) &
+  abs(Importe) <= 200
  )|
- (grepl("TRANSFERENCIAS EMITIDAS", Descripcion)&
-    abs(Importe) <= 200
+  # Transferencias emitidas hasta €200
+ (                      
+   (grepl("Transferencia A", Concepto)|
+    grepl("Traspaso", Concepto)|
+    grepl("Bizum", Concepto)
+   ) &
+   abs(Importe) <= 200
  )|
- (grepl("TRANSFERENCIAS RECIBIDAS", Descripcion)&
-    abs(Importe) <= 200
- )|                               
- (grepl("ABONO DE OPERACION CON TARJETA", Descripcion)|
-  grepl("ABONOS VARIOS CONCEPTOS", Descripcion)|
-  grepl("ADEUDO INTER/COMIS/GASTOS", Descripcion)|
-  (grepl("PAGO EN EFECTIVO", Descripcion)&
-#   grepl("Retirada De Efectivo En Cajero", Concepto)&
-   abs(Importe) < 370  
-  )
- ) 
+ # Transferencias recibidas hasta €200 (es compensacion gasto)             
+ (grepl("Transferencia De", Concepto) &
+  abs(Importe) <= 200
+ )|
+ # Conceptos Atípicos (devoluciones,compensacion gasto)             
+ (        
+  (grepl("Devolucion", Concepto)|
+   grepl("Anulacion", Concepto)
+  ) &
+  abs(Importe) <= 200  # Nunca los hubo mayores
+ )|
+ # Cajeros hasta €200 (no es Servicio)             
+ (       
+  (grepl("Reint", Concepto)|
+   grepl("Retirada De Efectivo En Cajero", Concepto)
+  ) & 
+  abs(Importe) < 200 
+ )
 )                                                          ~ "Gasto_Corriente",  
 
-# Gasto_Otro             
+# Gasto_Otro
+
+  # Cargos Tarjeta excepto Cajeros y mayores de €200       
+  # Transferencias Emitidas mayores de €200 (menores van a Tarjeta_Cte)
+  # Cajeros mayores de €550 (los menores van a Servicio)
 (
- (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
-    !grepl("Reint", Concepto)&
-    !abs(Importe) <= 200
+  # Cargos Tarjeta excepto Cajeros y mayores de €200 
+ (
+  (grepl("Compra", Concepto)|
+   grepl("Pago", Concepto)|
+   grepl("Transaccion", Concepto)
+  ) &
+  abs(Importe) > 200
  )|
- (grepl("TRANSFERENCIAS EMITIDAS", Descripcion)&
-    !abs(Importe) <= 200
- )|                            
- (grepl("CARGO DE OPERACION CON TARJETA", Descripcion)&
-    grepl("Reint", Concepto)&
-    abs(Importe) > 500
+  # Transferencias emitidas  mayores a €200 
+ (                     
+  (grepl("Transferencia A", Concepto)|
+   grepl("Traspaso", Concepto)|
+   grepl("Bizum", Concepto)
+  ) &
+  abs(Importe) > 200
  )|
- (grepl("PAGO EN EFECTIVO", Descripcion)&
-#    grepl("Retirada De Efectivo En Cajero", Concepto)&
-    abs(Importe) >=500  
- )   
+  # Cajeros mayor que €550 (no es Servicio)     
+ (                         
+  (grepl("Reint", Concepto)| 
+     grepl("Retirada De Efectivo En Cajero", Concepto)
+  ) &  
+  abs(Importe) > 550 
+ )
 )                                                             ~ "Gasto_Otro", 
 
+# Transferencias 
 
-
-
-# Transferencias   
-(grepl("TRANSFERENCIAS RECIBIDAS", Descripcion)&
-   !abs(Importe) <= 200
+  # Transferencias a casa (excluyendo menores de € 200)
+  # las menores van a Gasto_Cte (por compensación gastos)
+(
+  grepl("Transferencia De", Concepto)&
+    !abs(Importe) <= 200  &                         
+    !grepl("Pago Renta 2023", Concepto) # CASO RARO
+  # Eva, por error pago el 8nov2024 su IRPF desde Cta Casa (aparece como Compra Internet)
+  # Lo compensó con una transferencia a la casa. Esta se clasifica como Gasto_Otro porque
+  # en el concepto aparece "Pago" y es mayor de 220; así se compensa por el gasto).
+  # No debe, además contarse como Transferencia para Gastos Casa
 )                                                           ~ "Transferencias",
 
 # NC Movimiento sin Clasificar. No debe haber ninguno.
-(TRUE)                                                        ~ "NC"                           
+(TRUE)                                                        ~ "NC"
+
                             ) # Fin de case_when
       ) # Fin de mutate 
 

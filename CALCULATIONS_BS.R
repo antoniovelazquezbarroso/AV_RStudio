@@ -106,11 +106,11 @@ sum(REPORT$Gasto_Corriente)
 mean(REPORT$Gasto_Corriente) # Promedia los totales de todos los periodos
 sd(REPORT$Gasto_Corriente)   # Desviación típica entre los de todos los periodos
 
-summary(REPORT$Gasto_Otroo)
-length(REPORT$Gasto_Otroo)
-sum(REPORT$Gasto_Otroo)
-mean(REPORT$Gasto_Otroo)  # Promedia los totales de todos los periodos
-sd(REPORT$Gasto_Otroo)    # Desviación típica entre los de todos los periodos
+summary(REPORT$Gasto_Otro)
+length(REPORT$Gasto_Otro)
+sum(REPORT$Gasto_Otro)
+mean(REPORT$Gasto_Otro)  # Promedia los totales de todos los periodos
+sd(REPORT$Gasto_Otro)    # Desviación típica entre los de todos los periodos
 
 
 #summary(abs(REPORT$Total_Gasto))
@@ -147,3 +147,4 @@ quantile(abs(REPORT$Gasto_Corriente), prob=0.00)
 quantile(abs(REPORT$Gasto_Corriente), prob=1.00)
 MM3(abs(REPORT$Gasto_Corriente))
 MM4(abs(REPORT$Gasto_Corriente))
+
