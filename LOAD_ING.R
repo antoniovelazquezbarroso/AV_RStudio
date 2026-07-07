@@ -5,7 +5,7 @@ library(tidyverse)
 library(readxl)
 
 # Movimientos 01OCT2021-31MARZO2026 por fecha operación orden inverso
-Entrada <- read_excel("data/ING_01Oct2021_31Mar2026.xlsx", skip = 3) 
+Entrada <- read_excel("data/ING_01Oct2021_30Jun2026.xlsx", skip = 3) 
 
    #> names(Entrada)
    #[1] "F. VALOR"     "CATEGORÍA"    "SUBCATEGORÍA" "DESCRIPCIÓN"  "COMENTARIO"   "IMPORTE (€)"
