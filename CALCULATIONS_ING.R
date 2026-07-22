@@ -7,23 +7,46 @@ source("MyFunctions.R")
 #===============================================================================
 #  CUADRO DE ESTADÍSTICAS SOBRE COLUMNAS DE TOTALES SELECCIONADAS DE REPORT
 
-MISCOLS <- REPORT %>% select(Recibo_Cte:Total_Fijo)
+MISCOLS <- REPORT %>% select(Recibo_Cte:Total_Fijo) # Todas las columnas, salvo
+                                                    # Fecha Final y Check
 
-MISCOLS %>% pivot_longer(everything()) %>% 
-            group_by(name) %>% 
-            summarise(
-                      num=length(value),
-                      #n_miss = sum(is.na(value)),
-                      mean=mean(-value),
-                      sd=sd(-value),
-                      #skew <- sum(-value-mean)^3/sd^3/num,
-                      #kurt <- sum(-value-mean)^4/sd^4/num - 3,
-                      min=min(-value),
-                      q1=quantile(-value, prob=0.25),
-                      med=median(-value),
-                      q3=quantile(-value, prob=0.75),
-                      max=max(-value)
-                     )
+
+#                                               Daba errores con valores na
+#   MISCOLS %>% pivot_longer(everything()) %>% 
+#               group_by(name) %>% 
+#               summarise(
+#                         num=length(value),
+#                         #n_miss = sum(is.na(value)),
+#                         mean=mean(-value),
+#                         sd=sd(-value),
+#                         #skew <- sum(-value-mean)^3/sd^3/num,
+#                         #kurt <- sum(-value-mean)^4/sd^4/num - 3,
+#                         min=min(-value),
+#                         q1=quantile(-value, prob=0.25),
+#                         med=median(-value),
+#                         q3=quantile(-value, prob=0.75),
+#                         max=max(-value)
+#                        )
+#   
+
+                                      # Corregido con sugerencias Chat GPT na
+MISCOLS %>%
+  select(where(is.numeric)) %>%
+  pivot_longer(everything()) %>%
+  mutate(value = -value) %>%
+  group_by(name) %>%
+  summarise(
+    num    = sum(!is.na(value)),
+    n_miss = sum(is.na(value)),
+    mean   = mean(value, na.rm = TRUE),
+    sd     = sd(value, na.rm = TRUE),
+    min    = min(value, na.rm = TRUE),
+    q1     = quantile(value, probs = 0.25, na.rm = TRUE),
+    med    = median(value, na.rm = TRUE),
+    q3     = quantile(value, probs = 0.75, na.rm = TRUE),
+    max    = max(value, na.rm = TRUE)
+  )
+
 
 #===============================================================================
 #  CALCULANDO NUEVOS VALORES A PARTIR DE LOS TOTALES, 
